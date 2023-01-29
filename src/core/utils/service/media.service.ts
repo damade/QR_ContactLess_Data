@@ -11,7 +11,7 @@ import { checkFileSize, checkFileType } from "../helpers/media.helper";
 
 
 cloudinary.config({
-  cloud_name: "kadick-integrated-limited",
+  cloud_name: "dxi9rgcur",
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_SECRET_KEY,
 });

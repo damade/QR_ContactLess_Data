@@ -43,6 +43,22 @@ export const generateUniqueCode = (length) => {
     return result
 }
 
+export const generateUniqueBvn = () => {
+    let result = "", seeds
+
+    for (let i = 0; i < 11; i++) {
+        //Generate seeds array, that will be the bag from where randomly select generated char
+        seeds = [
+            Math.floor(Math.random() * 10) + 48,
+        ]
+
+        //Chose randomly from seeds, convert to char and append to result
+        result += String.fromCharCode(seeds[Math.floor(Math.random() * 3)])
+    }
+
+    return result
+}
+
 export const generateRandomString = (length) => {
     let result = "", seeds
 

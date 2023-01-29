@@ -1,6 +1,5 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { PrismaService } from './core/database/service/PrismaService';
 import { HttpExceptionFilter } from './core/exceptions/HttpExceptionFilter';
 import { TimeoutInterceptor } from './core/interceptors/timeout.interceptor';
 import { AppLogger } from './core/logger/logger';
@@ -25,10 +24,6 @@ async function bootstrap() {
 
   // handle all user input validation globally
   app.useGlobalPipes(new ValidateInputPipe());
-
-  //Prisma Add-ons
-  const prismaService = app.get(PrismaService);
-  await prismaService.enableShutdownHooks(app)
 
   //Start App
   await app.listen(process.env.PORT || 3000);

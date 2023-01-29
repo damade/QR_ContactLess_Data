@@ -22,11 +22,17 @@ export enum Tenure{
     CUSTOM = 'CUSTOM'
 }
 
-export enum GENDER {
+export enum Gender {
     Male,
     Female,
 }
 
+export enum Title {
+    Mr,
+    Miss,
+    Mrs,
+    Prof
+}
 export enum MARITAL_STATUS{
     Single,
     Married,
@@ -43,7 +49,8 @@ export enum IDENTIFICATION_TYPE {
     NIN = 'NIN',
     DRIVERSLICENSE = 'Drivers License',
     VOTERSCARD = 'Voters Card',
-    INTERNATIONALPASSPORT = 'International Passport'
+    INTERNATIONALPASSPORT = 'International Passport',
+    OTHERS = "Others"
 }
 
 export enum REFERRAL_SURVEY{

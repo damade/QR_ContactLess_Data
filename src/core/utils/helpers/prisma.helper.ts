@@ -19,3 +19,15 @@ export function exclude<User, Key extends keyof User>(
     }
     return user
   }  
+
+
+  // Exclude keys from user
+export function excludeIUser<IUser, Key extends keyof IUser>(
+  user: IUser,
+  ...keys: Key[]
+): Omit<IUser, Key> {
+  for (let key of keys) {
+    delete user[key]
+  }
+  return user
+}

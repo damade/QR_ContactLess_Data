@@ -50,6 +50,8 @@ export class OtpService {
                     this.emailService.sendOtp(recipientEmailAddress, otp)
                 }
             })
+
+            
         return send_message;
     };
 

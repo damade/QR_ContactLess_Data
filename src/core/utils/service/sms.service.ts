@@ -26,7 +26,7 @@ export class SmsService {
             var data = {
                 "to": termiiPhoneNumber,
                 "from": process.env.TERMII_SENDER_ID,
-                "sms": `Your KKREDIT One Time Password is ${otp}. This code expires in 5 minutes.`,
+                "sms": `Your Emma bank One Time Password is ${otp}. This code expires in 5 minutes.`,
                 "type": "plain",
                 "channel": "generic",
                 "api_key": process.env.TERMII_API_KEY,

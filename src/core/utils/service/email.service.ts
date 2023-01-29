@@ -10,8 +10,7 @@ export class EmailService {
     constructor(private readonly appLogger: AppLogger) { }
 
    private transporter = nodemailer.createTransport({
-        host: 'mail.kadickintegrated.com',
-        port: 465,
+        service: "gmail",
         secure: true,
         auth: {
             user: process.env.EMAIL,
@@ -21,10 +20,10 @@ export class EmailService {
     
    private message = (emailAddr : string, otp: string) => {
         return {
-            from: '"Kadick Dev" <no_reply@kadickintegrated.com>',
+            from: '"Emma Bank" <no_reply@emmanuel.com>',
             to: emailAddr,
-            subject: "K-KREDIT OTP",
-            text: `Your K-Kredit One Time Password is ${otp}. This code expires in 5 minutes.\n\n Support: 08000523425,\n Contact Us: customercare@kadickintegrated.com`,
+            subject: "Emma Bank OTP",
+            text: `Your bank account/bvn registration One Time Password is ${otp}. This code expires in 5 minutes.\n\n Support: 080005558685,\n Contact Us: customercare@emmabank.com`,
         }
     }
     

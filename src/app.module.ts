@@ -59,6 +59,6 @@ export class AppModule  implements NestModule {
     private readonly apiKeyGenService: ApiKeyGenerationService,
     private readonly appLogger: AppLogger
   ){
-      this.apiKeyGenService.startApiKeyCron()
+      //this.apiKeyGenService.startApiKeyCron()
   }
 }

@@ -5,6 +5,10 @@
   "author": "Damilola Adeoye",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": "19.4.0",
+    "npm": "9.2.0"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",

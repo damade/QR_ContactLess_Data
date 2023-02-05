@@ -50,10 +50,10 @@ export class UsersDatabaseService {
   }
 
   async userByPhoneNumberOrEmail(userPhoneNumber: string, userEmail: string): Promise<IUser | null> {
-    return await User.findOne({
+    return await User.findOne({$or: [{
       phoneNumber: userPhoneNumber,
       email: userEmail
-    }
+    }]}
     );
   }
 

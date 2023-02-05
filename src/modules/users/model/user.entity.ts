@@ -116,11 +116,19 @@ const userSchema = new Schema({
         type: Boolean,
         required: false
     },
+    hasBvnBeenApproved: {
+        type: Boolean,
+        required: false
+    },
     address:{
         type: Address.schema,
         required: true
     },
     isCreatingAccount: {
+        type: Boolean,
+        required: false
+    },
+    hasAccountBeenApproved: {
         type: Boolean,
         required: false
     },

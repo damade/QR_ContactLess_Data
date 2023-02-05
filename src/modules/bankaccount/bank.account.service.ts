@@ -20,7 +20,7 @@ export class BankAccountService {
         private readonly usersService: UsersService) { }
 
     async create(signatureFile: Express.Multer.File, profileImage: Express.Multer.File,
-         bankAccountDto: BankProfileDto): Promise<IBankAccount> {
+        bankAccountDto: BankProfileDto): Promise<IBankAccount> {
         try {
 
             // Check if profile image file is empty
@@ -63,14 +63,67 @@ export class BankAccountService {
             return await this.usersService.create(signatureFile, bankAccountDto.user, false, true)
                 .then(async (user: IUser) => {
                     return await this.bankAccountDB.createBankAccount(
-                        mapToBankAcount({...bankAccountDto, userId: user._id,
-                        bvn: encryptBvn, bvnIndex: bvnIndexRequest, nin: encryptNin,
-                        ninIndex: ninIndexRequest, userImage: fileLink })
+                        mapToBankAcount({
+                            ...bankAccountDto, userId: user._id,
+                            bvn: encryptBvn, bvnIndex: bvnIndexRequest, nin: encryptNin,
+                            ninIndex: ninIndexRequest, userImage: fileLink
+                        })
                     );
                 })
                 .catch(error => {
                     throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
                 })
+
+        }
+        catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    async createBankAccountOnly(profileImage: Express.Multer.File,
+        bankAccountDto: BankProfileDto, userId: string, generatedBvn: string): Promise<IBankAccount> {
+        try {
+
+            // Check if profile image file is empty
+            if (!profileImage) {
+                throw new HttpException("Please add your image for Identity", HttpStatus.BAD_REQUEST);
+            }
+
+            // Check For existing NIN
+            const userWithNin = await this.findOneByNin(bankAccountDto.nin)
+
+            if (userWithNin) {
+                throw new BadRequestException("Nin has been reqistered")
+            }
+
+            // //encrypt the nin and bvn for indexes
+            const bvnIndexRequest = await this.cipherSearchService.getBVNIndex(generatedBvn);
+
+            // //encrypt the nin and bvn
+            const encryptBvn = await this.cipherService.encryptWithAES(generatedBvn);
+
+            //encrypt the nin and bvn
+            const encryptNin = await this.cipherService.encryptWithAES(bankAccountDto.nin)
+
+            // //encrypt the nin and bvn
+            const ninIndexRequest = await this.cipherSearchService.getNINIndex(bankAccountDto.nin);
+
+            var fileLink = await this.mediaService.uploadImage(profileImage)
+                .catch(
+                    error => {
+                        throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+                    });
+
+
+            return await this.bankAccountDB.createBankAccount(
+                mapToBankAcount({
+                    ...bankAccountDto, userId: userId,
+                    bvn: encryptBvn, bvnIndex: bvnIndexRequest, nin: encryptNin,
+                    ninIndex: ninIndexRequest, userImage: fileLink
+                })
+            ).catch(error => {
+                throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+            })
 
         }
         catch (error) {

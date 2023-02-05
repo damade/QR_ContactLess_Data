@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsString, IsOptional, IsBoolean, ValidateNested } from 'class-validator';
-import { UserDto } from 'src/modules/users/dto/user.dto';
+import { BankProfileDto } from 'src/modules/bankaccount/dto/bank.account.dto';
 
 
 export class BvnDto {
@@ -22,8 +22,8 @@ export class BvnDto {
 
 
     @IsNotEmpty()
-    @Type(() => UserDto)
+    @Type(() => BankProfileDto)
     @ValidateNested()
-    readonly user: UserDto;
+    readonly bankProfile: BankProfileDto;
 
 }

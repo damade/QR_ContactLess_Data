@@ -19,7 +19,7 @@ export class BvnService {
 
             const generatedBvn = generateUniqueBvn()
 
-            return await this.usersService.create(signatureFile, bvnDto.user, true, false)
+            return await this.usersService.create(signatureFile, bvnDto.bankProfile.user, true, true)
                 .then(async (user: IUser) => {
                     return await this.bvnDB.createBvn(
                         mapToBvn({
@@ -36,6 +36,7 @@ export class BvnService {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
+
 
     async findOneById(userId: string): Promise<IBvn> {
         try {
@@ -62,5 +63,7 @@ export class BvnService {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
         };
     }
+
+    
 
 }

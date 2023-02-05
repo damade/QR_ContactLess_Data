@@ -21,7 +21,7 @@ import { OtpDto } from './dto/otp.verify.dto';
 export class AuthController {
     constructor(private authService: AuthService) { }
 
-   
+
     @UseGuards(LocalAuthGuard)
     @Post('login')
     async login(@Req() req) {
@@ -31,20 +31,34 @@ export class AuthController {
 
     @UseGuards(DoesUserExistForBvn)
     @Post('register-bvn')
-    async signUpBVn(@UploadedFile(
-        new ParseFilePipeBuilder()
-            .addFileTypeValidator({
-                fileType: 'jpeg' || 'jpg' || 'png',
-            })
-            .addMaxSizeValidator({
-                maxSize: 2500
-            })
-            .build({
-                errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
-            })
-    ) signatureImage: Express.Multer.File, @Body() userBVn: BvnDto) {
+    async signUpBVn(
+        @UploadedFile(
+            new ParseFilePipeBuilder()
+                .addFileTypeValidator({
+                    fileType: 'jpeg' || 'jpg' || 'png',
+                })
+                .addMaxSizeValidator({
+                    maxSize: 2500
+                })
+                .build({
+                    errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+                })
+        ) signatureImage: Express.Multer.File,
+        @UploadedFile(
+            new ParseFilePipeBuilder()
+                .addFileTypeValidator({
+                    fileType: 'jpeg' || 'jpg' || 'png',
+                })
+                .addMaxSizeValidator({
+                    maxSize: 2500
+                })
+                .build({
+                    errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+                })
+        ) identityImage: Express.Multer.File,
+        @Body() userBVn: BvnDto) {
 
-        return await this.authService.createBvnUser(signatureImage, userBVn );
+        return await this.authService.createBvnUser(identityImage, signatureImage, userBVn);
     }
 
 
@@ -52,12 +66,12 @@ export class AuthController {
     @UseInterceptors(FileFieldsInterceptor([
         { name: 'identityFile', maxCount: 1 },
         { name: 'signature', maxCount: 1 },
-      ]))
+    ]))
     @Post('register-account')
     async signUpBankAccount(
-        @UploadedFiles()files: { identityFile?: Express.Multer.File, signature?: Express.Multer.File }, 
+        @UploadedFiles() files: { identityFile?: Express.Multer.File, signature?: Express.Multer.File },
         @Body() userProfile: BankProfileDto) {
-            
+
         return await this.authService.createBankAccount(files.identityFile, files.signature, userProfile);
     }
 
@@ -97,13 +111,13 @@ export class AuthController {
         return await this.authService.verifyOtp(otpVerifyReq.phoneNumber, otpVerifyReq.otp);
     }
 
-    @Post(['forgot-pin/send-otp','send-otp'])
+    @Post(['forgot-pin/send-otp', 'send-otp'])
     @HttpCode(HttpStatus.CREATED)
     async sendForgottenPasswordOtp(@Body() otpReq: OtpEmailRequestDto) {
         return await this.authService.sendForgottenPasswordOtp(otpReq.email);
     }
 
-    @Post(['forgot-pin/verify-otp','verify-otp'])
+    @Post(['forgot-pin/verify-otp', 'verify-otp'])
     @HttpCode(HttpStatus.CREATED)
     async verifyForgottenPasswordOtp(@Body() otpVerifyReq: OtpEmailDto) {
         return await this.authService.verifyEmailOtp(otpVerifyReq.email, otpVerifyReq.otp);
@@ -113,10 +127,12 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     async getReferralList() {
         const referralList = await this.authService.getReferralList();
-        
+
         //return Referral List
-        const data: ApiData = { success: true, message: "Referral List Fetched Successfully",
-         payload: referralList  };
+        const data: ApiData = {
+            success: true, message: "Referral List Fetched Successfully",
+            payload: referralList
+        };
         return data
     }
 }

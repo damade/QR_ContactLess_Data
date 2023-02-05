@@ -14,8 +14,10 @@ import { BankAccountService } from '../bankaccount/bank.account.service';
 import { BankProfileDto } from '../bankaccount/dto/bank.account.dto';
 import { BvnService } from '../bvn/bvn.service';
 import { BvnDto } from '../bvn/dto/bvn.dto';
+import { IBvn } from '../bvn/model/bvn.entity';
 import { UserDto } from '../users/dto/user.dto';
 import { UserPasswordDto } from '../users/dto/user.pin.dto';
+import { IUser } from '../users/model/user.entity';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -50,9 +52,9 @@ export class AuthService {
     //     return await this.apiKeyFinder.getApiKey .apiKeys.find(apiK => apiKey === apiK);
     // }
 
-    async validateUser(phoneNumber: string, inputPassword: string) {
+    async validateUser(phoneNumber: string, inputPassword: string, email: string) {
         // find if user exist with this email
-        const user = await this.userService.findOneByPhoneNumber(phoneNumber);
+        const user = await this.userService.findOneByPhoneNumberOrEmail(phoneNumber, email);
         if (!user) {
             return null;
         }
@@ -64,7 +66,7 @@ export class AuthService {
         }
 
         // tslint:disable-next-line: no-string-literal
-        const { password, bearerToken,  ...result } = user;
+        const { password, bearerToken, ...result } = user;
 
         return result;
     }
@@ -85,20 +87,28 @@ export class AuthService {
         return data;
     }
 
-    public async createBvnUser(signatureFile: Express.Multer.File, bvnModel: BvnDto) {
-        if(!(await this.otpService.getOTP(bvnModel.user.phoneNumber))){
-            throw new BadRequestException('Otp has not been sent to the phone number');     
+    public async createBvnUser(identityFile: Express.Multer.File, signatureFile: Express.Multer.File, bvnModel: BvnDto) {
+        if (!(await this.otpService.getOTP(bvnModel.bankProfile.user.phoneNumber))) {
+            throw new BadRequestException('Otp has not been sent to the phone number');
         }
         try {
 
             // create the user
-            const newUser = await this.bvnService.create(signatureFile, bvnModel);
+            const newUser = await this.bvnService.create(signatureFile, bvnModel)
+                .then(async (userBvn: IBvn) => {
+                    return await this.bankAccountService.createBankAccountOnly(
+                        identityFile,
+                        bvnModel.bankProfile,
+                        userBvn.userId,
+                        userBvn.bvn
+                    );
+                });
 
             // tslint:disable-next-line: no-string-literal
-            const { bvn,  ...result } = newUser;
+            const { bvn, bvnIndex, nin, ninIndex, taxIdentificationNumber, ...result } = newUser
 
             // // return the user and the token
-            const data: ApiData = { success: true, message: "Account Created Successfully", payload: { user: result } };
+            const data: ApiData = { success: true, message: "Account Created Successfully, kindly got to your nearest bank for approval", payload: { user: result } };
             return data
         } catch (error) {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
@@ -108,8 +118,8 @@ export class AuthService {
     public async createBankAccount(
         identityFile: Express.Multer.File,
         signatureFile: Express.Multer.File, bankaccountModel: BankProfileDto) {
-        if(!(await this.otpService.getOTP(bankaccountModel.user.phoneNumber))){
-            throw new BadRequestException('Otp has not been sent to the phone number');     
+        if (!(await this.otpService.getOTP(bankaccountModel.user.phoneNumber))) {
+            throw new BadRequestException('Otp has not been sent to the phone number');
         }
         try {
 
@@ -117,8 +127,8 @@ export class AuthService {
             const newUser = await this.bankAccountService.create(signatureFile, identityFile, bankaccountModel);
 
 
-            const {bvn, bvnIndex, nin, ninIndex, taxIdentificationNumber, ...result} = newUser
-        
+            const { bvn, bvnIndex, nin, ninIndex, taxIdentificationNumber, ...result } = newUser
+
             // // return the user and the token
             const data: ApiData = { success: true, message: "Bank Account Created Successfully, kindly got to your nearest bank for approval", payload: { user: result } };
             return data
@@ -177,7 +187,7 @@ export class AuthService {
             const rPhoneNumber = await this.userService
                 .findOneByParams({ phoneNumber: userRequest.phoneNumber });
             const rEmail = await this.userService
-                .findOneByParams({ email: userRequest.email });    
+                .findOneByParams({ email: userRequest.email });
             if (rPhoneNumber) {
                 errorMessage += 'This phone number exist as a registered user,';
             } if (rEmail) {
@@ -259,7 +269,7 @@ export class AuthService {
                 }, {
                     name: "None",
                     value: "None"
-                },{
+                }, {
                     name: "Google",
                     value: "Google"
                 }, {

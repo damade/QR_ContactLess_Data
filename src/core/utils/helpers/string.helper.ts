@@ -104,5 +104,12 @@ String.prototype.getValueOrUndefined = function (){
     }else{
         return undefined
     }
-    
+}
+
+String.prototype.isEmptyOrNull = function (){
+    return this === "" || this === " " || this == "" || this == " " || !this 
+}
+
+String.prototype.isNotEmptyOrNull = function (){
+    return this !== "" && this !== " " && this != "" && this != " " && this 
 }

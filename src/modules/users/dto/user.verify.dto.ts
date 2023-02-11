@@ -1,13 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsEmail, IsEnum, IsPhoneNumber, Length, IsString, IsOptional, IsNumber, IsNumberString, isNumberString, isString, Matches, IsEmpty, IsDateString, ValidateNested, IsIn } from 'class-validator';
-import { Gender, IDENTIFICATION_TYPE, MARITAL_STATUS, REFERRAL_SURVEY, STATE, stateLg, Title } from 'src/core/constants';
+import { IsNotEmpty, IsEmail, IsEnum, IsPhoneNumber, Length, IsString, IsOptional, IsNumber, IsNumberString, isNumberString, isString, Matches, IsEmpty, IsDateString, ValidateNested } from 'class-validator';
+import { Gender, IDENTIFICATION_TYPE, MARITAL_STATUS, REFERRAL_SURVEY, STATE, Title } from 'src/core/constants';
 import { LGA } from 'src/core/validators/lga.validator';
 import { AddressDto } from './address.dto';
 
 
-export class UserDto {
-
-    readonly uniqueId: string;
+export class UserVerifyDto {
 
     @IsNotEmpty()
     @IsEnum(Title, {
@@ -69,7 +67,7 @@ export class UserDto {
 
     @IsString()
     @IsNotEmpty()
-    @LGA(UserDto, user => user.stateOfOrigin)
+    @LGA(UserVerifyDto, user => user.stateOfOrigin)
     readonly lgaOfOrigin: string;
 
     @IsString()
@@ -91,16 +89,5 @@ export class UserDto {
     @IsString()
     @IsNotEmpty()
     readonly idCardNo: string;
-
-    readonly signatureUrl: string;
-
-    readonly isCreatingBvn?: boolean;
-
-    readonly isCreatingAccount?: boolean;
-
-    @IsNotEmpty()
-    @Type(() => AddressDto)
-    @ValidateNested()
-    readonly address: AddressDto;
 
 }

@@ -186,7 +186,7 @@ export class BankAccountService {
     }
 
 
-    private async findOneByNin(nin: string): Promise<IBankAccount> {
+    async findOneByNin(nin: string): Promise<IBankAccount> {
         try {
             var finalUser: IBankAccount = null
             // Getting the encrypt the bvn index

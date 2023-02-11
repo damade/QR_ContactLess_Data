@@ -22,7 +22,7 @@ export function mapToUserFromBvn(bvnModel: BvnDto): IUser {
         firstName: bvnModel.bankProfile.user.firstName,
         lastName: bvnModel.bankProfile.user.lastName,
         middleName: bvnModel.bankProfile.user.middleName,
-        fullName: bvnModel.bankProfile.user.fullName,
+        fullName: bvnModel.bankProfile.user.firstName + " " + bvnModel.bankProfile.user.lastName,
         dateOfBirth: bvnModel.bankProfile.user.dateOfBirth,
         gender: bvnModel.bankProfile.user.gender,
         stateOfOrigin: bvnModel.bankProfile.user.stateOfOrigin,

@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { SmsService } from "./sms.service";
 import OTP from '../../model/otp.entity'
-import { IOtp } from '../../model/otp.entity';
+import Otp, { IOtp } from '../../model/otp.entity';
 import * as moment from "moment";
 import { isExpired } from "../helpers/time.helper";
 import { getRndInteger } from "../helpers/math.helper";
@@ -28,7 +28,7 @@ export class OtpService {
 
         const otp = getRndInteger(100000, 999999);
         // save the otp with the mobile number
-        const checkOtp = await this.getOTP(recipientPhoneNumber);
+        const checkOtp = await this.getOTP(recipientPhoneNumber, recipientEmailAddress);
         if (!checkOtp) {
             // save OTP
             await this.saveOTP(recipientPhoneNumber, recipientEmailAddress, otp);
@@ -51,7 +51,7 @@ export class OtpService {
                 }
             })
 
-            
+
         return send_message;
     };
 
@@ -59,15 +59,16 @@ export class OtpService {
 
         const otp = getRndInteger(100000, 999999);
         // save the otp with the mobile number
-        const checkOtp = await this.getOTP(recipientPhoneNumber);
+        const checkOtp = (await this.getOTP(recipientPhoneNumber, recipientEmailAddress))
+            .find(Otps => Otps.email == recipientEmailAddress && Otps.mobile_number == recipientPhoneNumber);
         if (!checkOtp) {
             // save OTP
             await this.saveOTP(recipientPhoneNumber, recipientEmailAddress, otp);
         } else {
             // update OTP
             const expires = moment().add(process.env.OTP_EXPIRATION_TIME, 'minutes')
-            await this.updateOTP(recipientPhoneNumber, {
-                mobile_number: recipientPhoneNumber,
+            await this.updateEmailOTP(recipientEmailAddress, {
+                email: recipientEmailAddress,
                 otp,
                 blacklisted: false,
                 expires
@@ -104,13 +105,11 @@ export class OtpService {
 
     verifyEmailOtp = async (email, otp) => {
         // compare saved otp/mobile number with the incoming one
-        const savedOtp = await this.getUnusedOTPEmail(email);
+        const savedOtps = await this.getUnusedOTPEmail(email);
 
-        if (!savedOtp) {
-            throw new HttpException('OTP used earlier', HttpStatus.UNAUTHORIZED);
-        }
+        const savedOtp = savedOtps.find(Otps => Otps.otp == otp)
 
-        if (savedOtp.otp !== otp) {
+        if (!savedOtps || !savedOtp || savedOtp.otp !== otp) {
             throw new HttpException('Invalid OTP', HttpStatus.BAD_REQUEST);
 
         }
@@ -120,7 +119,7 @@ export class OtpService {
             throw new HttpException('OTP expired already', HttpStatus.UNAUTHORIZED);
         }
 
-        await this.blacklistOTP(email);
+        await this.blacklistEmailOTP(email);
         return true;
     };
 
@@ -138,8 +137,8 @@ export class OtpService {
     };
 
 
-    getOTP = async (mobile_number): Promise<IOtp> => {
-        return await OTP.findOne({ mobile_number }).then((otp: IOtp) => {
+    getOTP = async (mobile_number, email): Promise<IOtp[]> => {
+        return await OTP.find({ $or: [{ mobile_number: mobile_number }, { email: email }] }).then((otp: IOtp[]) => {
             if (!otp) {
                 return null
             }
@@ -167,11 +166,11 @@ export class OtpService {
     }
 
     getUnusedOTPEmail = async (email) => {
-        return await OTP.findOne({ email, blacklisted: false }).then((otp: IOtp) => {
-            if (!otp) {
+        return await OTP.find({ email, blacklisted: false }).then((otps: IOtp[]) => {
+            if (!otps) {
                 return null
             }
-            return otp
+            return otps
         })
             .catch(error => {
                 // console.error(error.message);
@@ -188,8 +187,24 @@ export class OtpService {
         return updated;
     }
 
+    updateEmailOTP = async (email, payload) => {
+        const updated = await OTP.updateOne({ email }, { "$set": payload })
+        if (!updated) {
+            throw new HttpException('Error creating OTP', HttpStatus.BAD_REQUEST);
+        }
+        return updated;
+    }
+
     blacklistOTP = async (mobile_number) => {
         const blacklisted = await OTP.updateOne({ mobile_number }, { "$set": { blacklisted: true } })
+        if (!blacklisted) {
+            throw new HttpException('Error blacklisting OTP', HttpStatus.BAD_REQUEST);
+        }
+        return blacklisted;
+    }
+
+    blacklistEmailOTP = async (email) => {
+        const blacklisted = await OTP.updateOne({ email }, { "$set": { blacklisted: true } })
         if (!blacklisted) {
             throw new HttpException('Error blacklisting OTP', HttpStatus.BAD_REQUEST);
         }

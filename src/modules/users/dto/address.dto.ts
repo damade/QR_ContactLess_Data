@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsEnum, Length, IsDateString, MaxDate, IsDate, IsNumberString, IsString, IsOptional } from 'class-validator';
 import { IDENTIFICATION_TYPE, MARITAL_STATUS, STATE } from 'src/core/constants';
+import { LGA } from 'src/core/validators/lga.validator';
 
 
 export class AddressDto {
@@ -18,6 +19,7 @@ export class AddressDto {
 
     @IsNotEmpty()
     @IsString()
+    @LGA(AddressDto, address => address.state)
     readonly lga: string;
 
     @IsNotEmpty()

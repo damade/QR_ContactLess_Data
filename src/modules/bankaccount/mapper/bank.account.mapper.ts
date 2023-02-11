@@ -1,5 +1,3 @@
-import { mapToAddress } from "src/modules/users/mapper/user.mapper";
-import User, { IUser } from "src/modules/users/model/user.entity";
 import { BankProfileDto } from "../dto/bank.account.dto";
 import BankAccount, { IBankAccount } from "../model/bank.account.entity";
 

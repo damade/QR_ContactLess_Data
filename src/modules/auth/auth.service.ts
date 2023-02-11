@@ -88,7 +88,8 @@ export class AuthService {
     }
 
     public async createBvnUser(identityFile: Express.Multer.File, signatureFile: Express.Multer.File, bvnModel: BvnDto) {
-        if (!(await this.otpService.getOTP(bvnModel.bankProfile.user.phoneNumber))) {
+        const userInput = bvnModel.bankProfile.user
+        if (!(await this.otpService.getOTP(userInput.phoneNumber, userInput.email))) {
             throw new BadRequestException('Otp has not been sent to the phone number');
         }
         try {
@@ -118,7 +119,8 @@ export class AuthService {
     public async createBankAccount(
         identityFile: Express.Multer.File,
         signatureFile: Express.Multer.File, bankaccountModel: BankProfileDto) {
-        if (!(await this.otpService.getOTP(bankaccountModel.user.phoneNumber))) {
+
+        if (!(await this.otpService.getOTP(bankaccountModel.user.phoneNumber, bankaccountModel.user.email))) {
             throw new BadRequestException('Otp has not been sent to the phone number');
         }
         try {

@@ -11,6 +11,8 @@ import { ApiKeyStrategy } from './apikey.strategy';
 import { LoggerModule } from 'src/core/logger/logger.module';
 import { BankAccountModule } from '../bankaccount/bank.account.module';
 import { BvnModule } from '../bvn/bvn.module';
+import { VerificationController } from './verify.controller';
+import { VerifyService } from './verify.service';
 
 @Module({
   imports: [
@@ -25,7 +27,7 @@ import { BvnModule } from '../bvn/bvn.module';
       signOptions: { expiresIn: process.env.TOKEN_EXPIRATION },
   }),
 ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, ApiKeyStrategy],
-  controllers: [AuthController]
+  providers: [AuthService, VerifyService, LocalStrategy, JwtStrategy, ApiKeyStrategy],
+  controllers: [AuthController, VerificationController]
 })
 export class AuthModule {}

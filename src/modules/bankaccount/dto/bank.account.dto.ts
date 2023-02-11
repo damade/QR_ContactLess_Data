@@ -6,7 +6,7 @@ import { UserDto } from 'src/modules/users/dto/user.dto';
 
 export class BankProfileDto {
 
-    @IsNotEmpty()
+    @IsOptional()
     @Length(11,11, {
         message: "Bvn Length should be 11"
     })

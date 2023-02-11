@@ -23,7 +23,7 @@ export function mapToUser(userModel: UserDto): IUser {
         firstName: userModel.firstName,
         lastName: userModel.lastName,
         middleName: userModel.middleName,
-        fullName: userModel.fullName,
+        fullName: userModel.firstName + " " + userModel.lastName,
         dateOfBirth: userModel.dateOfBirth,
         gender: userModel.gender,
         stateOfOrigin: userModel.stateOfOrigin,

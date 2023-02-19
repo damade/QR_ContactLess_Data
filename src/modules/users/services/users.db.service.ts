@@ -9,13 +9,22 @@ export class UsersDatabaseService {
     return await User.findById(id);
   }
 
-  async userWithAdditionalFields(uniqueId: string):
+  async userWithAdditionalFields(uniqueId: any):
     Promise<any | null> {
     return await User.aggregate([
-      { $group: { _id: uniqueId } },
+      {$match: {_id: uniqueId}},
+      { $group: { _id: "$_id" } },
       {
         $lookup: {
-          from: "Bvn", // collection to join
+          from: "users", // collection to join
+          localField: "_id",//field from the input documents
+          foreignField: "_id",//field from the documents of the "from" collection
+          as: "user"// output array field
+        }
+      },
+      {
+        $lookup: {
+          from: "bvns", // collection to join
           localField: "_id",//field from the input documents
           foreignField: "userId",//field from the documents of the "from" collection
           as: "bvnInfo"// output array field
@@ -23,7 +32,7 @@ export class UsersDatabaseService {
       },
       {
         $lookup: {
-          from: "BankAccount", // collection to join
+          from: "bankaccounts", // collection to join
           localField: "_id",//field from the input documents
           foreignField: "userId",//field from the documents of the "from" collection
           as: "bankInfo"// output array field

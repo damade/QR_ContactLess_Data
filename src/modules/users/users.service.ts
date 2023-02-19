@@ -1,4 +1,4 @@
-import { ForbiddenException, HttpException, HttpStatus, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import mongoose from 'mongoose';
 import { ENUMS } from 'src/core/model/enums.entity';
 import { getErrorMessage } from 'src/core/utils/helpers/error.helper';
@@ -65,6 +65,25 @@ export class UsersService {
         catch (error) {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
         }
+    }
+
+    async getUserProfile(idInput: string): Promise<any> {
+        try {
+            const userWithAdditionalFields = (await this.userDB.userWithAdditionalFields(new mongoose.Types.ObjectId(idInput)))[0]
+
+            if(!userWithAdditionalFields){
+                throw new BadRequestException("User Profile Could Not Be Fetched")
+            }
+
+            return {
+                _id: userWithAdditionalFields._id, user: userWithAdditionalFields.user[0],
+                bvnInfo: userWithAdditionalFields.bvnInfo[0] ? userWithAdditionalFields.bvnInfo[0]: null,
+                bankInfo: userWithAdditionalFields.bankInfo[0]
+            }
+        }
+        catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        };
     }
 
     async updatePassword(user: UserPasswordDto): Promise<IUser> {
@@ -172,7 +191,16 @@ export class UsersService {
 
     async findOneById(idInput: string): Promise<IUser> {
         try {
-            return await this.userDB.userWithAdditionalFields(idInput)
+            return await this.userDB.userWithAdditionalFields(new mongoose.Types.ObjectId(idInput))
+        }
+        catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        };
+    }
+
+    async findOneByUserIdAdditional(idInput: string): Promise<any | null> {
+        try {
+            return await this.userDB.userWithAdditionalFields(new mongoose.Types.ObjectId(idInput))
         }
         catch (error) {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
@@ -181,7 +209,7 @@ export class UsersService {
 
     async findOneByUserId(idInput: string): Promise<any | null> {
         try {
-            return await this.userDB.userWithAdditionalFields(idInput)
+            return await this.userDB.user(idInput)
         }
         catch (error) {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)

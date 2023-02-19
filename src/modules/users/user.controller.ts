@@ -30,8 +30,7 @@ export class UserController {
     @Get('get')
     @HttpCode(HttpStatus.OK)
     async getProfile(@Request() req) {
-        const profile = await this.userService.findOneById(req.user.id);
-        this.appLogger.log(profile)
+        const profile = await this.userService.getUserProfile(req.user._id);
         // return the user and the token
         const data: ApiData = {
             success: true, message: "User Profile Fetched Successfully",
@@ -43,11 +42,10 @@ export class UserController {
     @Get('qr-code')
     @HttpCode(HttpStatus.OK)
     async getQrUrl(@Request() req) {
-        const qrUrl = await this.userService.fetchUserQrData(req.user.id);
-        this.appLogger.log(qrUrl)
+        const qrUrl = await this.userService.fetchUserQrData(req.user._id);
         // return the qr url
         const data: ApiData = {
-            success: true, message: "User Profile Fetched Successfully",
+            success: true, message: "User QR Code Fetched Successfully",
             payload: { qrUrl }
         };
         return data

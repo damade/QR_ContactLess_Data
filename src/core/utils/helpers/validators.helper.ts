@@ -39,7 +39,6 @@ function getPhoneNumberOrEmail(phoneNumberOrEmail: string): { phoneNumber: strin
     if (phoneNumberOrEmail.includes("@") || phoneNumberOrEmail.indexOf('@') !== -1 || isEmail(phoneNumberOrEmail)) {
         email = phoneNumberOrEmail
     } else if (isPhoneNumber(phoneNumberOrEmail) || isPhoneNumberAlso(phoneNumberOrEmail)) {
-        console.log("PhoneNumber TYpe")
         phoneNumber = phoneNumberOrEmail
     } else{
         throw new UnprocessableEntityException("Cannot process email or phone number format")

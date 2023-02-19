@@ -16,12 +16,9 @@ export class QrService {
     ) { }
 
     generateUserQrToScan(user: IUser): string {
-        
+    
         const currentTime = new Date();
-        const urlToSend = `${process.env.PASSWORD_RESET_URL}
-        /fetch-qr-info/${encodeURIComponent(user.uniqueId + '/' + currentTime + '/' + ' ' + user._id + ' ')}`;
-            
-        this.appLogger.log(urlToSend)
+        const urlToSend = `${process.env.APP_URL}/fetch-qr-info/${encodeURIComponent(user.uniqueId + '/' + currentTime.toISOString() + '/' + ' ' + user._id + ' ')}`;
         return urlToSend;
     };
 

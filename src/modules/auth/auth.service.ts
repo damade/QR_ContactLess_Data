@@ -83,6 +83,17 @@ export class AuthService {
         return data;
     }
 
+    public async loginFullInfo(user) {
+        const { _id, phoneNumber, email, uniqueId } = user
+        //Extracting relevant info for Bearer Token.
+        const newUser = { _id, phoneNumber, email, uniqueId }
+        const token = await this.generateToken(newUser);
+        await this.userService.updateBearerToken(_id, token)
+        const fullUserInfo = await this.userService.getUserProfile(_id)
+        const data: ApiData = { success: true, message: "Login Successful", payload: { userInfo: fullUserInfo, token: `Bearer ${token}` } };
+        return data;
+    }
+
     public async logout(id: string) {
         await this.userService.updateBearerToken(id, null)
         const data: ApiData = { success: true, message: "Logout Successful" };

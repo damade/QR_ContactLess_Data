@@ -28,6 +28,12 @@ export class AuthController {
         return await this.authService.login(req.user);
     }
 
+    @UseGuards(LocalAuthGuard)
+    @Post('login-full')
+    async loginWithFullInfo(@Req() req) {
+        return await this.authService.loginFullInfo(req.user);
+    }
+
 
     @UseGuards(DoesUserExistForBvn)
     @Post('register-bvn')

@@ -1,5 +1,5 @@
 import { ForbiddenException, HttpException, HttpStatus, Injectable, UnprocessableEntityException } from '@nestjs/common';
-
+import mongoose from 'mongoose';
 import { ENUMS } from 'src/core/model/enums.entity';
 import { getErrorMessage } from 'src/core/utils/helpers/error.helper';
 import { CipherSearchService } from 'src/core/utils/service/cipher.search.service';
@@ -12,6 +12,8 @@ import { UsersDatabaseService } from './services/users.db.service';
 import { IUser } from './model/user.entity';
 import { mapToUser } from './mapper/user.mapper';
 import { QrService } from 'src/core/utils/service/qr.service';
+import { generateUniqueCode } from 'src/core/utils/helpers/string.helper';
+import { AppLogger } from 'src/core/logger/logger';
 
 @Injectable()
 export class UsersService {
@@ -20,6 +22,7 @@ export class UsersService {
         private readonly mediaService: MediaService,
         private readonly cipherService: CipherService,
         private readonly qrService: QrService,
+        private readonly appLogger: AppLogger,
         private readonly cipherSearchService: CipherSearchService) { }
 
     async create(signatureFile: Express.Multer.File, user: UserDto,
@@ -41,6 +44,22 @@ export class UsersService {
                 {
                     ...user, signatureUrl: fileLink, password: hashPassword,
                     isCreatingAccount: isCreatingAccount, isCreatingBvn: isCreatingBvn
+                }));
+        }
+        catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    async createWithoutImage(user: UserDto, isCreatingBvn: boolean, isCreatingAccount: boolean): Promise<IUser> {
+        try {
+
+            // hash the password
+            const hashPassword = await this.cipherService.hashPassword(user.password);
+            return await this.userDB.createUser(mapToUser(
+                {
+                    ...user, password: hashPassword, isCreatingAccount: isCreatingAccount,
+                    isCreatingBvn: isCreatingBvn, uniqueId: generateUniqueCode(10)
                 }));
         }
         catch (error) {
@@ -78,9 +97,10 @@ export class UsersService {
 
     async updateBearerToken(userId: string, bearerTokenInput: string): Promise<IUser> {
         try {
+            const userIdObject = new mongoose.Types.ObjectId(userId)
             return await this.userDB.updateUser(
                 {
-                    query: { id: userId },
+                    query: { _id: userIdObject },
                     newData: { bearerToken: bearerTokenInput },
                 });
         }

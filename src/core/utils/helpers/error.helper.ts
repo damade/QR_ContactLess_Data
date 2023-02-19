@@ -26,8 +26,3 @@ type ErrorWithMessage = {
 export const getErrorMessage = (error: unknown) =>{
     return toErrorWithMessage(error).message
 }
-
-export const PaystackErrorBuilder = (object, statusCode) => {
-   object["statusCode"] = statusCode
-   return object
-}

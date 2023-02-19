@@ -1,7 +1,5 @@
-import { Schema, Types, model, Document } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 import { Gender, IDENTIFICATION_TYPE, MARITAL_STATUS, Title } from 'src/core/constants';
-import addressSchema from './address.entity';
-import Address, { IAddress } from './address.entity';
 
 export interface IUser extends Document {
     uniqueId: string;
@@ -23,10 +21,14 @@ export interface IUser extends Document {
     idCardNo: string;
     signatureUrl: string;
     password: string;
-    address: IAddress;
     isCreatingBvn?: boolean;
-    bearerToken: string
+    bearerToken?: string
     isCreatingAccount?: boolean;
+    address: string;
+    landmark: string;
+    city: string;
+    lga: string;
+    state: string;
 }
 
 const userSchema = new Schema({
@@ -110,7 +112,7 @@ const userSchema = new Schema({
     },
     bearerToken: {
         type: String,
-        required: true
+        required: false
     },
     isCreatingBvn: {
         type: Boolean,
@@ -120,10 +122,6 @@ const userSchema = new Schema({
         type: Boolean,
         required: false
     },
-    address:{
-        type: Address.schema,
-        required: true
-    },
     isCreatingAccount: {
         type: Boolean,
         required: false
@@ -132,8 +130,27 @@ const userSchema = new Schema({
         type: Boolean,
         required: false
     },
+    address: {
+        type: String,
+        required: true,
+    },
+    city: {
+        type: String,
+        required: true,
+    },
+    lga: {
+        type: String,
+        required: true,
+    },
+    landmark: {
+        type: String,
+    },
+    state: {
+        type: String,
+        required: true,
+    },
 },
-    { timestamps: true });
+    { timestamps: true});
 
 const User = model<IUser>('User', userSchema);
 

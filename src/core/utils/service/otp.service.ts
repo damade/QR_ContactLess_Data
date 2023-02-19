@@ -151,6 +151,20 @@ export class OtpService {
             });
     }
 
+    getEmailOTP = async (email): Promise<IOtp[]> => {
+        return await OTP.find({ email, blacklisted: true }).then((otp: IOtp[]) => {
+            if (!otp) {
+                return null
+            }
+            return otp
+        })
+            .catch(error => {
+                // console.error(error.message);
+                this.appLogger.log(error.message);
+                throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+            });
+    }
+
     getUnusedOTP = async (mobile_number) => {
         return await OTP.findOne({ mobile_number, blacklisted: false }).then((otp: IOtp) => {
             if (!otp) {

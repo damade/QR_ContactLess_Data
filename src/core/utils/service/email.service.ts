@@ -9,7 +9,7 @@ export class EmailService {
 
     constructor(private readonly appLogger: AppLogger) { }
 
-   private transporter = nodemailer.createTransport({
+    private transporter = nodemailer.createTransport({
         service: "gmail",
         secure: true,
         auth: {
@@ -17,27 +17,27 @@ export class EmailService {
             pass: process.env.EMAIL_PASSWORD
         }
     })
-    
-   private message = (emailAddr : string, otp: string) => {
+
+    private message = (emailAddr: string, otp: string) => {
         return {
-            from: '"Emma Bank" <no_reply@emmanuel.com>',
+            from: '"E2Z Bank" <no_reply@e2zbank.com>',
             to: emailAddr,
-            subject: "Emma Bank OTP",
-            text: `Your bank account/bvn registration One Time Password is ${otp}. This code expires in 5 minutes.\n\n Support: 080005558685,\n Contact Us: customercare@emmabank.com`,
+            subject: "E2Z OTP",
+            text: `Your bank account/bvn registration One Time Password is ${otp}. This code expires in 5 minutes.\n\n Support: 080005558685,\n Contact Us: customercare@e2zbank.com`,
         }
     }
-    
+
     async sendOtp(emailAddr: string, otp: string) {
-        try{
-            const sender =  await this.transporter.sendMail(this.message(emailAddr, otp));
+        try {
+            const sender = await this.transporter.sendMail(this.message(emailAddr, otp));
             this.appLogger.log("Mail sent")
-        
+
             return sender;
         }
-        catch (e){
+        catch (e) {
             this.appLogger.log(e);
             throw new Error(e.message);
         }
-    
+
     }
 }

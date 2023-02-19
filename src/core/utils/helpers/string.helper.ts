@@ -53,7 +53,7 @@ export const generateUniqueBvn = () => {
         ]
 
         //Chose randomly from seeds, convert to char and append to result
-        result += String.fromCharCode(seeds[Math.floor(Math.random() * 3)])
+        result += String.fromCharCode(seeds[Math.floor(Math.random())])
     }
 
     return result

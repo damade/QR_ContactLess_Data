@@ -1,12 +1,13 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsString, IsOptional, IsBoolean, ValidateNested, Length, IsNumberString } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsBoolean, ValidateNested, Length, IsNumberString, ValidateIf, IsBooleanString } from 'class-validator';
 import { AddressDto } from 'src/modules/users/dto/address.dto';
 import { UserDto } from 'src/modules/users/dto/user.dto';
 
 
 export class BankProfileDto {
 
-    @IsOptional()
+    @ValidateIf(verifyDto => verifyDto.isCreatingBvn == false || verifyDto.isCreatingBvn == "false")
+    @IsNotEmpty()
     @Length(11,11, {
         message: "Bvn Length should be 11"
     })
@@ -35,6 +36,10 @@ export class BankProfileDto {
     readonly userImage: string;
 
     readonly userId: string;
+
+    @IsNotEmpty()
+    @IsBooleanString()
+    readonly isCreatingBvn: boolean;
 
     @IsNotEmpty()
     @Type(() => UserDto)

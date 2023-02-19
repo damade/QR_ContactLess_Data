@@ -12,7 +12,7 @@ export class BvnDto {
     @IsString()
     readonly language: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsBoolean()
     readonly isApproved: boolean;
 

@@ -1,10 +1,11 @@
 import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { identity } from 'rxjs';
 import { AppLogger } from 'src/core/logger/logger';
 import { ApiData } from 'src/core/model/api.data';
-import { ENUMS } from 'src/core/model/enums.entity';
+import { BvnCreationData } from 'src/core/model/util.data';
 import { getErrorMessage } from 'src/core/utils/helpers/error.helper';
+import { isNotMediaLink } from 'src/core/utils/helpers/media.helper';
+import { genericExclude } from 'src/core/utils/helpers/prisma.helper';
 import { ApiKeyGenerationService } from 'src/core/utils/service/api.key.gen.service';
 import { CipherSearchService } from 'src/core/utils/service/cipher.search.service';
 import { CipherService } from 'src/core/utils/service/cipher.service';
@@ -17,7 +18,6 @@ import { BvnDto } from '../bvn/dto/bvn.dto';
 import { IBvn } from '../bvn/model/bvn.entity';
 import { UserDto } from '../users/dto/user.dto';
 import { UserPasswordDto } from '../users/dto/user.pin.dto';
-import { IUser } from '../users/model/user.entity';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -59,24 +59,26 @@ export class AuthService {
             return null;
         }
 
+        const userInJson =user.toJSON()
+
         // find if user password match
-        const match = await this.cipherService.comparePassword(inputPassword, user.password);
+        const match = await this.cipherService.comparePassword(inputPassword, userInJson.password);
         if (!match) {
             return null;
         }
 
         // tslint:disable-next-line: no-string-literal
-        const { password, bearerToken, ...result } = user;
+        const { password, __v, bearerToken, ...result } = userInJson;
 
         return result;
     }
 
     public async login(user) {
-        const { id, phoneNumber, email, uniqueId } = user
+        const { _id, phoneNumber, email, uniqueId } = user
         //Extracting relevant info for Bearer Token.
-        const newUser = { id, phoneNumber, email, uniqueId }
+        const newUser = { _id, phoneNumber, email, uniqueId }
         const token = await this.generateToken(newUser);
-        await this.userService.updateBearerToken(id, token)
+        await this.userService.updateBearerToken(_id, token)
         const data: ApiData = { success: true, message: "Login Successful", payload: { user, token: `Bearer ${token}` } };
         return data;
     }
@@ -89,8 +91,9 @@ export class AuthService {
 
     public async createBvnUser(identityFile: Express.Multer.File, signatureFile: Express.Multer.File, bvnModel: BvnDto) {
         const userInput = bvnModel.bankProfile.user
-        if (!(await this.otpService.getOTP(userInput.phoneNumber, userInput.email))) {
-            throw new BadRequestException('Otp has not been sent to the phone number');
+        const otps = await this.otpService.getEmailOTP(userInput.email)
+        if (!(otps) || otps.length < 1) {
+            throw new BadRequestException('Otp has not been sent to the Email');
         }
         try {
 
@@ -120,8 +123,10 @@ export class AuthService {
         identityFile: Express.Multer.File,
         signatureFile: Express.Multer.File, bankaccountModel: BankProfileDto) {
 
-        if (!(await this.otpService.getOTP(bankaccountModel.user.phoneNumber, bankaccountModel.user.email))) {
-            throw new BadRequestException('Otp has not been sent to the phone number');
+        const otps = await this.otpService.getEmailOTP(bankaccountModel.user.email)
+
+        if (!(otps) || otps.length < 1) {
+            throw new BadRequestException('Otp has not been sent to the Email');
         }
         try {
 
@@ -133,6 +138,68 @@ export class AuthService {
 
             // // return the user and the token
             const data: ApiData = { success: true, message: "Bank Account Created Successfully, kindly got to your nearest bank for approval", payload: { user: result } };
+            return data
+        } catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    public async createBvnUserWithoutImage(bvnModel: BvnDto) {
+        const userInput = bvnModel.bankProfile.user
+        const otps = await this.otpService.getEmailOTP(userInput.email)
+        if (!(otps) || otps.length < 1) {
+            throw new BadRequestException('Otp has not been sent or verified via email');
+        }
+        if (isNotMediaLink(bvnModel.bankProfile.userImage) || isNotMediaLink(userInput.signatureUrl)) {
+            throw new HttpException("Please add your image for Identity or Signature", HttpStatus.BAD_REQUEST);
+        }
+        if (bvnModel.bankProfile.isCreatingBvn == false) {
+            throw new HttpException("You need to create a BVN, just so you know.", HttpStatus.BAD_REQUEST);
+        }
+        try {
+            // create the user
+            const newUser = await this.bvnService.createWithoutImage(bvnModel)
+                .then(async (userBvnInfo: BvnCreationData) => {
+                  const createBankAccount =  await this.bankAccountService.createBankAccountOnlyWithoutImage(
+                        bvnModel.bankProfile,
+                        userBvnInfo.user._id,
+                        userBvnInfo.bvnInfo.bvn
+                    );
+                    return {user: userBvnInfo.user, bankInfo: createBankAccount["_doc"], bvnInfo: userBvnInfo.bvnInfo}
+                });
+
+            // extract info not needed
+            const { bvn, bvnIndex, nin, userId, _id, __v, ninIndex, taxIdentificationNumber, ...result } = newUser.bankInfo
+
+            // // return the user and the token
+            const data: ApiData = { success: true, message: "Account Created Successfully, kindly got to your nearest bank for approval",
+             payload: { user: newUser.user, bankInfo: result, bvnInfo: genericExclude(newUser.bvnInfo, "userId","_id","__v") } };
+            return data
+        } catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    public async createBankAccountWithoutImage(bankaccountModel: BankProfileDto) {
+        const otps = await this.otpService.getEmailOTP(bankaccountModel.user.email)
+        if (!(otps) || otps.length < 1) {
+            throw new BadRequestException('Otp has not been sent or verified via email');
+        }
+
+        if (isNotMediaLink(bankaccountModel.userImage) || isNotMediaLink(bankaccountModel.user.signatureUrl)) {
+            throw new HttpException("Please add your image for Identity or Signature", HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+
+            // create the user
+            const newUser = await this.bankAccountService.createWithoutImage(bankaccountModel);
+
+            const { bvn, bvnIndex, nin, userId, ninIndex, taxIdentificationNumber, ...bankInfoResult } = newUser.bankInfo
+
+            // // return the user and the token
+            const data: ApiData = { success: true, message: "Bank Account Created Successfully, kindly got to your nearest bank for approval",
+             payload: { user: newUser.user, bankInfo: bankInfoResult } };
             return data
         } catch (error) {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
@@ -242,47 +309,5 @@ export class AuthService {
         } catch (error) {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
         }
-    }
-
-    async getReferralList(): Promise<ENUMS[]> {
-        try {
-            const enumsValue: ENUMS[] =
-                [{
-                    name: "Friend",
-                    value: "Friend"
-                }, {
-                    name: "Twitter",
-                    value: "Twitter"
-                }, {
-                    name: "WhatsApp",
-                    value: "WhatsApp"
-                }, {
-                    name: "Instagram",
-                    value: "Instagram"
-                }, {
-                    name: "Facebook",
-                    value: "Facebook"
-                }, {
-                    name: "Others",
-                    value: "Others"
-                }, {
-                    name: "Family",
-                    value: "Family"
-                }, {
-                    name: "None",
-                    value: "None"
-                }, {
-                    name: "Google",
-                    value: "Google"
-                }, {
-                    name: "Linkedln",
-                    value: "Linkedln"
-                },]
-
-            return enumsValue;
-        }
-        catch (error) {
-            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
-        };
     }
 }

@@ -1,4 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { AppLogger } from 'src/core/logger/logger';
+import { BvnCreationData } from 'src/core/model/util.data';
 import { getErrorMessage } from 'src/core/utils/helpers/error.helper';
 import { generateUniqueBvn } from 'src/core/utils/helpers/string.helper';
 import { IUser } from '../users/model/user.entity';
@@ -11,7 +13,9 @@ import { BvnDatabaseService } from './services/bvn.db.service';
 @Injectable()
 export class BvnService {
 
-    constructor(private readonly bvnDB: BvnDatabaseService,
+    constructor(
+        private readonly bvnDB: BvnDatabaseService,
+        private readonly appLogger: AppLogger,
         private readonly usersService: UsersService) { }
 
     async create(signatureFile: Express.Multer.File, bvnDto: BvnDto): Promise<IBvn> {
@@ -27,6 +31,28 @@ export class BvnService {
                             bvn: generatedBvn
                         })
                     );
+                })
+                .catch(error => {
+                    throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+                })
+        }
+        catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    async createWithoutImage(bvnDto: BvnDto): Promise<BvnCreationData> {
+        try {
+            const generatedBvn = generateUniqueBvn()
+            return await this.usersService.createWithoutImage(bvnDto.bankProfile.user, true, true)
+                .then(async (user: IUser) => {
+                    const createdBvnInfo = await this.bvnDB.createBvn(
+                        mapToBvn({
+                            ...bvnDto, userId: user._id,
+                            bvn: generatedBvn
+                        })
+                    );
+                    return {user, bvnInfo: createdBvnInfo["_doc"]}
                 })
                 .catch(error => {
                     throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)

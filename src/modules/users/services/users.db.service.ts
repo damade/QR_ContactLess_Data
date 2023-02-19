@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { IAddress } from '../model/address.entity';
 import User, { IUser } from '../model/user.entity';
 
 
@@ -50,10 +49,13 @@ export class UsersDatabaseService {
   }
 
   async userByPhoneNumberOrEmail(userPhoneNumber: string, userEmail: string): Promise<IUser | null> {
-    return await User.findOne({$or: [{
-      phoneNumber: userPhoneNumber,
-      email: userEmail
-    }]}
+    return await User.findOne({
+      $or: [{
+        phoneNumber: userPhoneNumber
+      }, {
+        email: userEmail
+      }]
+    }
     );
   }
 

@@ -1,18 +1,6 @@
 import { AddressDto } from "../dto/address.dto";
 import { UserDto } from "../dto/user.dto";
-import Address, { IAddress } from "../model/address.entity";
 import User, { IUser } from "../model/user.entity";
-
-
-export function mapToAddress(addressModel: AddressDto): IAddress {
-    return new Address({
-        address: addressModel.address,
-        city: addressModel.city,
-        lga: addressModel.lga,
-        landmark: addressModel.landmark,
-        state: addressModel.state,
-    })
-}
 
 export function mapToUser(userModel: UserDto): IUser {
     return new User({
@@ -35,7 +23,11 @@ export function mapToUser(userModel: UserDto): IUser {
         idCardNo: userModel.idCardNo,
         signatureUrl: userModel.signatureUrl,
         password: userModel.password,
-        address: mapToAddress(userModel.address),
+        address: userModel.address.address,
+        city: userModel.address.city,
+        lga: userModel.address.lga,
+        landmark: userModel.address.landmark,
+        state: userModel.address.state,
         isCreatingAccount: userModel.isCreatingAccount,
         isCreatingBvn: userModel.isCreatingBvn
     })

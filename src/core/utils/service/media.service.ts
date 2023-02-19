@@ -12,8 +12,8 @@ import { checkFileSize, checkFileType } from "../helpers/media.helper";
 
 cloudinary.config({
   cloud_name: "dxi9rgcur",
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_SECRET_KEY,
+  api_key: process.env.cloudinaryApiKey,
+  api_secret: process.env.cloudinarySecretKey,
 });
 
 
@@ -127,7 +127,7 @@ export class MediaService {
 
   }
 
-  async deleteImage(imageUrl): Promise<string> {
+  async deleteImage(imageUrl: string): Promise<string> {
     try {
       const publicId = getCloudinaryPublicId(imageUrl);
       const internalResult = await this.internalImageDeleter(publicId).catch(error => {

@@ -1,20 +1,26 @@
 import { BadRequestException, HttpException, HttpStatus, UnprocessableEntityException } from "@nestjs/common";
+import { isEmail, isPhoneNumber } from "class-validator";
 import { getErrorMessage } from "./error.helper";
 
-export const validateLoginCredentials = (data: { phoneNumber: string, password: string, email: string }) => {
+export const validateLoginCredentials = (inputData: { phoneNumberOrEmail: string, password: string }) => {
     try {
-        if (data.password.isEmptyOrNull()) {
+        if (!inputData.phoneNumberOrEmail) {
+            throw new UnprocessableEntityException("PhoneNumber or Email Must be provided")
+        }
+        const data = getPhoneNumberOrEmail(inputData.phoneNumberOrEmail)
+        console
+        if (inputData.password.isEmptyOrNull()) {
             throw new UnprocessableEntityException("Password can not be empty")
         } else if (data.phoneNumber.isEmptyOrNull() && data.email.isEmptyOrNull()) {
             throw new UnprocessableEntityException("Phone number and email can not be empty")
-        } else if (data.password.length <= 6) {
+        } else if (inputData.password.length <= 6) {
             throw new UnprocessableEntityException("Password Length should be more than 6")
         } else if (data.phoneNumber.isNotEmptyOrNull()) {
             validatePhoneNumber(data.phoneNumber)
         } else if (!validateEmail(data.email)) {
             throw new UnprocessableEntityException("Email does not match acceptable pattern.")
         }
-        return true;
+        return data;
     } catch (error) {
         if (error instanceof UnprocessableEntityException) {
             throw new UnprocessableEntityException(getErrorMessage(error));
@@ -25,6 +31,32 @@ export const validateLoginCredentials = (data: { phoneNumber: string, password: 
         }
     }
 };
+
+function getPhoneNumberOrEmail(phoneNumberOrEmail: string): { phoneNumber: string, email: string } {
+    var phoneNumber = ""
+    var email = ""
+
+    if (phoneNumberOrEmail.includes("@") || phoneNumberOrEmail.indexOf('@') !== -1 || isEmail(phoneNumberOrEmail)) {
+        email = phoneNumberOrEmail
+    } else if (isPhoneNumber(phoneNumberOrEmail) || isPhoneNumberAlso(phoneNumberOrEmail)) {
+        console.log("PhoneNumber TYpe")
+        phoneNumber = phoneNumberOrEmail
+    } else{
+        throw new UnprocessableEntityException("Cannot process email or phone number format")
+    }
+
+    return { phoneNumber, email }
+}
+
+const isPhoneNumberAlso = (phoneNumber: string): boolean => {
+    var phoneNumberRegex = [/^\(?([0-9]{11})\)$/, /^\+?([0-9]{11})\)$/,/^\(?([0-9]{13})\)$/, /^\+?([0-9]{13})\)$/];
+
+    if (phoneNumber.startsWith("0") || phoneNumber.startsWith("234")
+    || phoneNumberRegex.every(regex => phoneNumber.match(regex))) {
+        return true
+    }
+    return false
+}
 
 const validatePhoneNumber = (phoneNumber: string) => {
     //Negates the check valid phonenumber

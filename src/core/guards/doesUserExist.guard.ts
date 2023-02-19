@@ -14,15 +14,14 @@ export class DoesUserExistForBvn implements CanActivate {
     }
 
     async validateRequest(request) {
-        const userExist = await this.userService.findOneByPhoneNumberOrEmail(request.body.phoneNumber,
-                                        request.body.email);
+        const userExist = await this.userService.findOneByPhoneNumberOrEmail(request.body.bankProfile.user.phoneNumber,
+                                        request.body.bankProfile.user.email);
         if (userExist && userExist.isCreatingBvn) {
             throw new ForbiddenException('This phone number or email exist for registering BVN, kindly login and apply');
         } else if (userExist && userExist.isCreatingAccount) {
-            throw new ForbiddenException('This user already has an account, you can not apply for BVN anymore');
+            throw new ForbiddenException('This user already has an account, you can not apply for BVN as you have an existing account');
         } else if(userExist){
             throw new ForbiddenException('This phone number or email exist, kindly login and check the status');
-       
         }
         return true;
     }

@@ -4,6 +4,7 @@ import { AppLogger } from 'src/core/logger/logger';
 import { ApiData } from 'src/core/model/api.data';
 import { ENUMS } from 'src/core/model/enums.entity';
 import { getErrorMessage } from 'src/core/utils/helpers/error.helper';
+import { MediaService } from 'src/core/utils/service/media.service';
 import { OtpService } from 'src/core/utils/service/otp.service';
 import { BankAccountService } from '../bankaccount/bank.account.service';
 import { AddressDto } from '../users/dto/address.dto';
@@ -18,7 +19,8 @@ export class VerifyService {
         private readonly userService: UsersService,
         private readonly bankAccountService: BankAccountService,
         private readonly otpService: OtpService,
-        private readonly appLogger: AppLogger) { }
+        private readonly appLogger: AppLogger,
+        private readonly mediaService: MediaService) { }
 
 
     fetchLg(state: string): ApiData {
@@ -26,9 +28,9 @@ export class VerifyService {
             throw new UnprocessableEntityException("State query can not be empty");
         }
         const lga = stateLg.find(states => states.state.toLowerCase() === state.toLowerCase() || states.alias === state.toLowerCase());
-        if(lga){
-           return { success: true, message: `Local Government Fetched successfully for ${state}`, payload: { lg: lga.lgas } }
-        }else{
+        if (lga) {
+            return { success: true, message: `Local Government Fetched successfully for ${state}`, payload: { lg: lga.lgas } }
+        } else {
             throw new UnprocessableEntityException("State entered can not be found");
         }
 
@@ -135,6 +137,39 @@ export class VerifyService {
         catch (error) {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
         };
+    }
+
+
+    async uploadImages(signatureFile: Express.Multer.File, profileImage: Express.Multer.File): Promise<any> {
+
+        // Check if profile image file is empty
+        if (!profileImage) {
+            throw new HttpException("Please add your image for Identity", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!signatureFile) {
+            throw new HttpException("Please add your image for Signature", HttpStatus.BAD_REQUEST);
+        }
+
+
+        return await this.mediaService.uploadImage(profileImage)
+            .then(async (profileImageLink: string) => {
+                const signatureImageLink = await this.mediaService.uploadImage(signatureFile)
+                    .catch(async (error) => {
+                            await this.mediaService.deleteImage(profileImageLink)
+                            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+                        });
+                const data: ApiData = {
+                    success: true, message: "Signature and Profile Image Uploaded Successfully",
+                    payload: {
+                        profileImageLink, signatureImageLink
+                    }
+                }
+                return data;
+            })
+            .catch(async (error) => {
+                throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+            });
     }
 
 }

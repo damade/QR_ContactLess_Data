@@ -1,4 +1,6 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { AppLogger } from 'src/core/logger/logger';
+import { BankAccountCreationData } from 'src/core/model/util.data';
 
 import { getErrorMessage } from 'src/core/utils/helpers/error.helper';
 import { CipherSearchService } from 'src/core/utils/service/cipher.search.service';
@@ -17,6 +19,7 @@ export class BankAccountService {
         private readonly mediaService: MediaService,
         private readonly cipherService: CipherService,
         private readonly cipherSearchService: CipherSearchService,
+        private readonly appLogger: AppLogger,
         private readonly usersService: UsersService) { }
 
     async create(signatureFile: Express.Multer.File, profileImage: Express.Multer.File,
@@ -80,6 +83,57 @@ export class BankAccountService {
         }
     }
 
+    async createWithoutImage(bankAccountDto: BankProfileDto): Promise<BankAccountCreationData> {
+        try {
+
+            // Check For existing NIN
+            const userWithNin = await this.findOneByNin(bankAccountDto.nin)
+
+            if (userWithNin) {
+                throw new BadRequestException("Nin has been reqistered")
+            }
+
+            // Check for exiating BVN
+            const userWithBvn = await this.findOneByBvn(bankAccountDto.bvn)
+
+            if (userWithBvn) {
+                throw new BadRequestException("Bvn has been reqistered")
+            }
+
+            // //encrypt the nin and bvn for indexes
+            const bvnIndexRequest = await this.cipherSearchService.getBVNIndex(bankAccountDto.bvn);
+
+            // //encrypt the nin and bvn
+            const encryptBvn = await this.cipherService.encryptWithAES(bankAccountDto.bvn);
+
+            //encrypt the nin and bvn
+            const encryptNin = await this.cipherService.encryptWithAES(bankAccountDto.nin)
+
+            // //encrypt the nin and bvn
+            const ninIndexRequest = await this.cipherSearchService.getNINIndex(bankAccountDto.nin);
+
+
+            return await this.usersService.createWithoutImage(bankAccountDto.user, false, true)
+                .then(async (user: IUser) => {
+                    const createdBankAccount = await this.bankAccountDB.createBankAccount(
+                        mapToBankAcount({
+                            ...bankAccountDto, userId: user._id,
+                            bvn: encryptBvn, bvnIndex: bvnIndexRequest, nin: encryptNin,
+                            ninIndex: ninIndexRequest
+                        })
+                    );
+                    return {user , bankInfo: createdBankAccount["_doc"]}
+                })
+                .catch(error => {
+                    throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+                })
+
+        }
+        catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
     async createBankAccountOnly(profileImage: Express.Multer.File,
         bankAccountDto: BankProfileDto, userId: string, generatedBvn: string): Promise<IBankAccount> {
         try {
@@ -120,6 +174,44 @@ export class BankAccountService {
                     ...bankAccountDto, userId: userId,
                     bvn: encryptBvn, bvnIndex: bvnIndexRequest, nin: encryptNin,
                     ninIndex: ninIndexRequest, userImage: fileLink
+                })
+            ).catch(error => {
+                throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+            })
+
+        }
+        catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    async createBankAccountOnlyWithoutImage(bankAccountDto: BankProfileDto, userId: string, 
+        generatedBvn: string): Promise<IBankAccount> {
+        try {
+            // Check For existing NIN
+            const userWithNin = await this.findOneByNin(bankAccountDto.nin)
+
+            if (userWithNin) {
+                throw new BadRequestException("Nin has been reqistered")
+            }
+
+            // //encrypt the nin and bvn for indexes
+            const bvnIndexRequest = await this.cipherSearchService.getBVNIndex(generatedBvn);
+
+            // //encrypt the nin and bvn
+            const encryptBvn = await this.cipherService.encryptWithAES(generatedBvn);
+
+            //encrypt the nin and bvn
+            const encryptNin = await this.cipherService.encryptWithAES(bankAccountDto.nin)
+
+            // //encrypt the nin and bvn
+            const ninIndexRequest = await this.cipherSearchService.getNINIndex(bankAccountDto.nin);
+
+            return await this.bankAccountDB.createBankAccount(
+                mapToBankAcount({
+                    ...bankAccountDto, userId: userId,
+                    bvn: encryptBvn, bvnIndex: bvnIndexRequest, nin: encryptNin,
+                    ninIndex: ninIndexRequest
                 })
             ).catch(error => {
                 throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)

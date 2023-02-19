@@ -5,7 +5,7 @@ export interface IBvn extends Document {
     language?: string
     isApproved?: boolean;
     bvn: string;
-    userId: any;
+    userId: string;
 }
 
 const bvnSchema = new Schema({
@@ -15,7 +15,6 @@ const bvnSchema = new Schema({
     },
     language: {
         type: String,
-        required: true
     },
     isApproved: {
         type: Boolean,
@@ -23,7 +22,7 @@ const bvnSchema = new Schema({
     },
     bvn: {
         type: String,
-        required: false
+        required: true
     },
     userId:{
         type:Schema.Types.ObjectId, ref:'User',

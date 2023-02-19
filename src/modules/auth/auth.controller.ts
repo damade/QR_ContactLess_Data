@@ -34,11 +34,8 @@ export class AuthController {
     async signUpBVn(
         @UploadedFile(
             new ParseFilePipeBuilder()
-                .addFileTypeValidator({
-                    fileType: 'jpeg' || 'jpg' || 'png',
-                })
                 .addMaxSizeValidator({
-                    maxSize: 2500
+                    maxSize: 2500000
                 })
                 .build({
                     errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
@@ -46,11 +43,8 @@ export class AuthController {
         ) signatureImage: Express.Multer.File,
         @UploadedFile(
             new ParseFilePipeBuilder()
-                .addFileTypeValidator({
-                    fileType: 'jpeg' || 'jpg' || 'png',
-                })
                 .addMaxSizeValidator({
-                    maxSize: 2500
+                    maxSize: 2500000
                 })
                 .build({
                     errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
@@ -62,17 +56,40 @@ export class AuthController {
     }
 
 
-    @UseGuards(DoesUserExistForAccount)
+
     @UseInterceptors(FileFieldsInterceptor([
         { name: 'identityFile', maxCount: 1 },
         { name: 'signature', maxCount: 1 },
     ]))
     @Post('register-account')
+    @HttpCode(HttpStatus.CREATED)
+    @UseGuards(DoesUserExistForAccount)
     async signUpBankAccount(
-        @UploadedFiles() files: { identityFile?: Express.Multer.File, signature?: Express.Multer.File },
+        @UploadedFiles(new ParseFilePipeBuilder()
+            .addMaxSizeValidator({
+                maxSize: 2500000
+            })
+            .build({
+                errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+            })) files: { identityFile?: Express.Multer.File, signature?: Express.Multer.File },
         @Body() userProfile: BankProfileDto) {
 
         return await this.authService.createBankAccount(files.identityFile, files.signature, userProfile);
+    }
+
+    @UseGuards(DoesUserExistForBvn)
+    @Post('register/bvn')
+    @HttpCode(HttpStatus.CREATED)
+    async signUpBvnJson(@Body() userBVn: BvnDto) {
+        return await this.authService.createBvnUserWithoutImage(userBVn);
+    }
+
+
+    @Post('register/account')
+    @HttpCode(HttpStatus.CREATED)
+    @UseGuards(DoesUserExistForAccount)
+    async signUpBankAccountJson(@Body() userProfile: BankProfileDto) {
+        return await this.authService.createBankAccountWithoutImage(userProfile);
     }
 
 
@@ -121,18 +138,5 @@ export class AuthController {
     @HttpCode(HttpStatus.CREATED)
     async verifyForgottenPasswordOtp(@Body() otpVerifyReq: OtpEmailDto) {
         return await this.authService.verifyEmailOtp(otpVerifyReq.email, otpVerifyReq.otp);
-    }
-
-    @Get('referral-list')
-    @HttpCode(HttpStatus.OK)
-    async getReferralList() {
-        const referralList = await this.authService.getReferralList();
-
-        //return Referral List
-        const data: ApiData = {
-            success: true, message: "Referral List Fetched Successfully",
-            payload: referralList
-        };
-        return data
     }
 }

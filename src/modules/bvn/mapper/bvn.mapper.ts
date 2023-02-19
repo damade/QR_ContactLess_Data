@@ -1,4 +1,3 @@
-import { mapToAddress } from "src/modules/users/mapper/user.mapper";
 import User, { IUser } from "src/modules/users/model/user.entity";
 import { BvnDto } from "../dto/bvn.dto";
 import Bvn, { IBvn } from "../model/bvn.entity";
@@ -34,7 +33,7 @@ export function mapToUserFromBvn(bvnModel: BvnDto): IUser {
         idCardNo: bvnModel.bankProfile.user.idCardNo,
         signatureUrl: bvnModel.bankProfile.user.signatureUrl,
         password: bvnModel.bankProfile.user.password,
-        address: mapToAddress(bvnModel.bankProfile.user.address),
+        address: bvnModel.bankProfile.user.address,
         isCreatingAccount: bvnModel.bankProfile.user.isCreatingAccount,
         isCreatingBvn: bvnModel.bankProfile.user.isCreatingBvn
     })

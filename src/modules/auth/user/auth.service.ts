@@ -6,19 +6,16 @@ import { BvnCreationData } from 'src/core/model/util.data';
 import { getErrorMessage } from 'src/core/utils/helpers/error.helper';
 import { isNotMediaLink } from 'src/core/utils/helpers/media.helper';
 import { genericExclude } from 'src/core/utils/helpers/prisma.helper';
-import { ApiKeyGenerationService } from 'src/core/utils/service/api.key.gen.service';
-import { CipherSearchService } from 'src/core/utils/service/cipher.search.service';
 import { CipherService } from 'src/core/utils/service/cipher.service';
 import { OtpService } from 'src/core/utils/service/otp.service';
-import { ReferralCodeService } from 'src/core/utils/service/referral.code.service';
-import { BankAccountService } from '../bankaccount/bank.account.service';
-import { BankProfileDto } from '../bankaccount/dto/bank.account.dto';
-import { BvnService } from '../bvn/bvn.service';
-import { BvnDto } from '../bvn/dto/bvn.dto';
-import { IBvn } from '../bvn/model/bvn.entity';
-import { UserDto } from '../users/dto/user.dto';
-import { UserPasswordDto } from '../users/dto/user.pin.dto';
-import { UsersService } from '../users/users.service';
+import { BankAccountService } from '../../bankaccount/bank.account.service';
+import { BankProfileDto } from '../../bankaccount/dto/bank.account.dto';
+import { BvnService } from '../../bvn/bvn.service';
+import { BvnDto } from '../../bvn/dto/bvn.dto';
+import { IBvn } from '../../bvn/model/bvn.entity';
+import { UserDto } from '../../users/dto/user.dto';
+import { UserPasswordDto } from '../../users/dto/user.pin.dto';
+import { UsersService } from '../../users/users.service';
 
 @Injectable()
 export class AuthService {
@@ -27,14 +24,10 @@ export class AuthService {
         private readonly userService: UsersService,
         private readonly jwtService: JwtService,
         private readonly cipherService: CipherService,
-        private readonly appLogger: AppLogger,
-        private readonly apiKeyFinder: ApiKeyGenerationService,
-        private readonly cipherSearchService: CipherSearchService,
         private readonly bvnService: BvnService,
+        private readonly appLogger: AppLogger,
         private readonly bankAccountService: BankAccountService,
-        private readonly otpService: OtpService,
-        private readonly referralCodeService: ReferralCodeService
-    ) { }
+        private readonly otpService: OtpService    ) { }
 
     // KEYS
     private apiKeys: string[] = [
@@ -76,7 +69,7 @@ export class AuthService {
     public async login(user) {
         const { _id, phoneNumber, email, uniqueId } = user
         //Extracting relevant info for Bearer Token.
-        const newUser = { _id, phoneNumber, email, uniqueId }
+        const newUser = { _id, phoneNumber, email, uniqueId, isAdmin: false }
         const token = await this.generateToken(newUser);
         await this.userService.updateBearerToken(_id, token)
         const data: ApiData = { success: true, message: "Login Successful", payload: { user, token: `Bearer ${token}` } };

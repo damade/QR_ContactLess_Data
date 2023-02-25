@@ -1,20 +1,19 @@
-import { Controller, Get, UseGuards, Body, Post, Request, HttpCode, HttpStatus, Patch, Req, ParseFilePipeBuilder, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Controller, UseGuards, Body, Post, Request, HttpCode, HttpStatus, Patch, Req, ParseFilePipeBuilder, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Public } from 'src/core/decorators/public.decorator';
 import { DoesUserExistForBvn } from 'src/core/guards/doesUserExist.guard';
 import { DoesUserExistForAccount } from 'src/core/guards/doesUserExistUS.guard';
 import { JwtAuthGuard } from 'src/core/guards/jwt.auth.guard';
 import { LocalAuthGuard } from 'src/core/guards/local.auth.guard';
-import { ApiData } from 'src/core/model/api.data';
-import { BankProfileDto } from '../bankaccount/dto/bank.account.dto';
-import { BvnDto } from '../bvn/dto/bvn.dto';
-import { UserDto } from '../users/dto/user.dto';
-import { UserPasswordDto } from '../users/dto/user.pin.dto';
+import { BankProfileDto } from '../../bankaccount/dto/bank.account.dto';
+import { BvnDto } from '../../bvn/dto/bvn.dto';
+import { UserDto } from '../../users/dto/user.dto';
+import { UserPasswordDto } from '../../users/dto/user.pin.dto';
 import { AuthService } from './auth.service';
-import { OtpRequestDto } from './dto/otp.dto';
-import { OtpEmailRequestDto } from './dto/otp.email.dto';
-import { OtpEmailDto } from './dto/otp.email.verify.dto';
-import { OtpDto } from './dto/otp.verify.dto';
+import { OtpRequestDto } from '../dto/otp.dto';
+import { OtpEmailRequestDto } from '../dto/otp.email.dto';
+import { OtpEmailDto } from '../dto/otp.email.verify.dto';
+import { OtpDto } from '../dto/otp.verify.dto';
 
 @Controller('customer/auth')
 @Public()
@@ -102,7 +101,7 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     @Post('logout')
     async logOut(@Request() req) {
-        return await this.authService.logout(req.user.id);
+        return await this.authService.logout(req.user._id);
     }
 
     @Patch('forgot-pin')

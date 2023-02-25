@@ -39,11 +39,11 @@ export class BankAccountDatabaseService {
     return await BankAccount.findOne(queryParams);
   }
 
-  async approvedBvnInfos(): Promise<IBankAccount[] | null> {
+  async approvedBankInfos(): Promise<IBankAccount[] | null> {
     return await BankAccount.find({ isProfileComplete: true }).populate('userId');
   }
 
-  async unApprovedBvnInfos(): Promise<IBankAccount[] | null> {
+  async unApprovedBankInfos(): Promise<IBankAccount[] | null> {
     return await BankAccount.find({ isProfileComplete: false }).populate('userId');
   }
 

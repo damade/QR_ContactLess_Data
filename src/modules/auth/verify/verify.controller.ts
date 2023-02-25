@@ -1,11 +1,11 @@
 import { Controller, Body, Post, HttpCode, HttpStatus, Patch, ParseFilePipeBuilder, UploadedFile, Query, Get, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { Public } from 'src/core/decorators/public.decorator';
-import { AddressDto } from '../users/dto/address.dto';
-import { UserVerifyDto } from '../users/dto/user.verify.dto';
-import { OtpRequestDto } from './dto/otp.dto';
-import { OtpEmailDto } from './dto/otp.email.verify.dto';
-import { VerifyDto } from './dto/verify.dto';
+import { AddressDto } from '../../users/dto/address.dto';
+import { UserVerifyDto } from '../../users/dto/user.verify.dto';
+import { OtpRequestDto } from '../dto/otp.dto';
+import { OtpEmailDto } from '../dto/otp.email.verify.dto';
+import { VerifyDto } from '../dto/verify.dto';
 import { VerifyService } from './verify.service';
 
 @Controller('customer')

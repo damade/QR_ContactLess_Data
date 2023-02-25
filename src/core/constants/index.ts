@@ -27,6 +27,13 @@ export enum Gender {
     Female,
 }
 
+export enum BankBranch {
+  BabcockUni,
+  Ketu,
+  Shagamu,
+  Abuja
+}
+
 export enum Title {
     Mr,
     Miss,

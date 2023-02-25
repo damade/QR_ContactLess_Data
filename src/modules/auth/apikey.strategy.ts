@@ -1,7 +1,7 @@
 import Strategy, { HeaderAPIKeyStrategy } from 'passport-headerapikey';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthService } from './user/auth.service';
 import { AppLogger } from 'src/core/logger/logger';
 import { nextTick } from 'process';
 

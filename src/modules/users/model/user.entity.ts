@@ -29,6 +29,8 @@ export interface IUser extends Document {
     city: string;
     lga: string;
     state: string;
+    hasAccountBeenApproved?: boolean;
+    hasBvnBeenApproved?: boolean;
 }
 
 const userSchema = new Schema({
@@ -120,7 +122,8 @@ const userSchema = new Schema({
     },
     hasBvnBeenApproved: {
         type: Boolean,
-        required: false
+        required: false,
+        default: false
     },
     isCreatingAccount: {
         type: Boolean,
@@ -128,7 +131,8 @@ const userSchema = new Schema({
     },
     hasAccountBeenApproved: {
         type: Boolean,
-        required: false
+        required: false,
+        default: false,
     },
     address: {
         type: String,

@@ -20,6 +20,7 @@ import { AppLogger } from './core/logger/logger';
 import { BvnModule } from './modules/bvn/bvn.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { AdminUsersModule } from './modules/admin_users/admin.users.module';
 
 
 @Module({
@@ -27,7 +28,7 @@ import { AuthModule } from './modules/auth/auth.module';
     storage: memoryStorage(), // use memory storage for having the buffer
   }),
     ScheduleModule.forRoot(),//For CronJobs,
-    DatabaseModule, UtilsModule, LoggerModule, TaskHandlerModule, BvnModule,
+    DatabaseModule, UtilsModule, LoggerModule, TaskHandlerModule, BvnModule, AdminUsersModule,
     UsersModule, AuthModule, BvnModule ],
   controllers: [AppController],
   providers: [AppService,

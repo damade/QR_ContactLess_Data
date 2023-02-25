@@ -6,11 +6,11 @@ import { ENUMS } from 'src/core/model/enums.entity';
 import { getErrorMessage } from 'src/core/utils/helpers/error.helper';
 import { MediaService } from 'src/core/utils/service/media.service';
 import { OtpService } from 'src/core/utils/service/otp.service';
-import { BankAccountService } from '../bankaccount/bank.account.service';
-import { AddressDto } from '../users/dto/address.dto';
-import { UserVerifyDto } from '../users/dto/user.verify.dto';
-import { UsersService } from '../users/users.service';
-import { VerifyDto } from './dto/verify.dto';
+import { BankAccountService } from '../../bankaccount/bank.account.service';
+import { AddressDto } from '../../users/dto/address.dto';
+import { UserVerifyDto } from '../../users/dto/user.verify.dto';
+import { UsersService } from '../../users/users.service';
+import { VerifyDto } from '../dto/verify.dto';
 
 @Injectable()
 export class VerifyService {

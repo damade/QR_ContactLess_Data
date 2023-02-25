@@ -240,6 +240,22 @@ export class UsersService {
         };
     }
 
+    async approvedBankInfos(): Promise<IUser[] | null> {
+        return await this.userDB.approvedBankInfos();
+      }
+    
+      async unApprovedBankInfos(): Promise<IUser[] | null> {
+        return await this.userDB.unApprovedBankInfos();
+      }
+    
+      async approvedBvns(): Promise<IUser[] | null> {
+        return await this.userDB.approvedBvns();
+      }
+    
+      async unApprovedBvns(): Promise<IUser[] | null> {
+        return await this.userDB.unApprovedBvns();
+      }
+
 
 
 

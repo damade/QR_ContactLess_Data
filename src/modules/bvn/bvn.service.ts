@@ -90,6 +90,12 @@ export class BvnService {
         };
     }
 
-    
+    async findUnapprovedBvns(): Promise<IBvn[]>{
+        return await this.bvnDB.unApprovedBvnInfos()
+     }
+ 
+     async findApprovedBvns(): Promise<IBvn[]>{
+         return await this.bvnDB.approvedBvnInfos()
+     }
 
 }

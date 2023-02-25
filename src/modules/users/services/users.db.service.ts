@@ -130,4 +130,20 @@ export class UsersDatabaseService {
     return await User.findByIdAndDelete(id);
   }
 
+  async approvedBankInfos(): Promise<IUser[] | null> {
+    return await User.find({ hasAccountBeenApproved: true });
+  }
+
+  async unApprovedBankInfos(): Promise<IUser[] | null> {
+    return await User.find({ hasAccountBeenApproved: false });
+  }
+
+  async approvedBvns(): Promise<IUser[] | null> {
+    return await User.find({ hasBvnBeenApproved: true });
+  }
+
+  async unApprovedBvns(): Promise<IUser[] | null> {
+    return await User.find({ hasBvnBeenApproved: false });
+  }
+
 }

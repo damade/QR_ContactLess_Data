@@ -323,4 +323,12 @@ export class BankAccountService {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
         };
     }
+
+    async findUnapprovedBvns(): Promise<IBankAccount[]>{
+       return await this.bankAccountDB.unApprovedBankInfos()
+    }
+
+    async findApprovedBvns(): Promise<IBankAccount[]>{
+        return await this.bankAccountDB.approvedBankInfos()
+     }
 }

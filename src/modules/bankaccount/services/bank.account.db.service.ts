@@ -21,10 +21,10 @@ export class BankAccountDatabaseService {
     return await BankAccount.find(queryParams);
   }
 
-  async approveUserBankAccountCreation(uniqueId: string, isProfileComplete: boolean): Promise<IBankAccount> {
+  async approveUserBankAccountCreation(uniqueId: string): Promise<IBankAccount> {
     return await BankAccount.findOneAndUpdate(
       { userId: new mongoose.Types.ObjectId(uniqueId) },
-      { isProfileComplete: isProfileComplete}
+      { isProfileComplete: true}
     )
   }
 

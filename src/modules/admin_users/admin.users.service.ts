@@ -11,12 +11,19 @@ import { QrService } from 'src/core/utils/service/qr.service';
 import { AppLogger } from 'src/core/logger/logger';
 import { IAdminUser } from './model/admin.user.entity';
 import { generateUniqueCode } from 'src/core/utils/helpers/string.helper';
+import { BankAccountService } from '../bankaccount/bank.account.service';
+import { BvnService } from '../bvn/bvn.service';
+import { UsersService } from '../users/users.service';
+import { RequestForApprovalDto } from './dto/req.approval.dto';
 
 @Injectable()
 export class AdminUsersService {
 
     constructor(private readonly userDB: AdminUsersDatabaseService,
         private readonly cipherService: CipherService,
+        private readonly bankAccountService: BankAccountService,
+        private readonly bvnAccountService: BvnService,
+        private readonly customerService: UsersService,
         private readonly appLogger: AppLogger) { }
 
     async create(user: AdminUserDto): Promise<IAdminUser> {
@@ -25,9 +32,9 @@ export class AdminUsersService {
             const hashPassword = await this.cipherService.hashPassword(user.password);
 
             const createAdminUser =
-             await this.userDB.createUser(mapToAdminUser({ ...user, password: hashPassword, uniqueId: generateUniqueCode(7) }));
+                await this.userDB.createUser(mapToAdminUser({ ...user, password: hashPassword, uniqueId: generateUniqueCode(7) }));
 
-             return createAdminUser["_doc"]
+            return createAdminUser["_doc"]
         }
         catch (error) {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
@@ -48,7 +55,7 @@ export class AdminUsersService {
         }
     }
 
-    
+
 
     async updateBearerToken(userId: string, bearerTokenInput: string): Promise<IAdminUser> {
         try {
@@ -134,4 +141,86 @@ export class AdminUsersService {
         };
     }
 
+    async getYetToApproveBvnUsers() {
+        return await this.bvnAccountService.findUnapprovedBvns();
+
+    }
+
+    async getYetToApproveUsersBvn() {
+        return await this.customerService.unApprovedBvns();
+    }
+
+    async getYetToApproveUsersBankInfo() {
+        return await this.customerService.unApprovedBankInfos();
+    }
+
+    async getYetToApproveBankInfoUsers() {
+        return await this.bankAccountService.findUnapprovedBankInfos();
+    }
+
+    async getApprovedBvnUsers() {
+        return await this.bvnAccountService.findApprovedBvns();
+    }
+
+    async getApprovedUsersBvn() {
+        return await this.customerService.approvedBvns();
+    }
+
+    async getApprovedBankInfoUsers() {
+        return await this.bankAccountService.findApprovedBankInfos();
+    }
+
+    async getApprovedUsersBankInfo() {
+        return await this.customerService.approvedBankInfos();
+    }
+
+    async approveBvn(requestDto: RequestForApprovalDto) {
+        const user = await this.customerService.findOneByParams({
+            uniqueId: requestDto.uniqueId,
+            email: requestDto.email,
+            phonNumber: requestDto.phoneNumber,
+            _id: new mongoose.Types.ObjectId(requestDto.userId),
+            isCreatingBvn: true, isCreatingAccount: true,
+            hasAccountBeenApproved: false, hasBvnBeenApproved: false
+        })
+
+        if (!user) {
+            throw new UnprocessableEntityException("User Info Does Not Match or Bvn has been Approved")
+        }
+
+        const updatedUser = await this.bvnAccountService.approveUserBvnCreation(user._id)
+            .then(async () => {
+                return await this.bankAccountService.approveUserBankAccountCreation(user._id).then(
+                    async () => {
+                        return await this.customerService.updateApprovedAccountCreation(user._id)
+                    }
+                )
+
+            });
+
+        return updatedUser
+    }
+
+    async approveBankInfo(requestDto: RequestForApprovalDto) {
+        const user = await this.customerService.findOneByParams({
+            uniqueId: requestDto.uniqueId,
+            email: requestDto.email,
+            phonNumber: requestDto.phoneNumber,
+            _id: new mongoose.Types.ObjectId(requestDto.userId),
+            isCreatingAccount: true,
+            hasAccountBeenApproved: false, hasBvnBeenApproved: false
+        })
+
+        if (!user) {
+            throw new UnprocessableEntityException("User Info Does Not Match or Bvn has been Approved")
+        }
+
+        const updatedUser = await this.bankAccountService.approveUserBankAccountCreation(user._id).then(
+            async () => {
+                return await this.customerService.updateApprovedAccountCreation(user._id)
+            }
+        )
+
+        return updatedUser
+    }
 }

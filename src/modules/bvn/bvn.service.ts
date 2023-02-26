@@ -98,4 +98,7 @@ export class BvnService {
          return await this.bvnDB.approvedBvnInfos()
      }
 
+    async approveUserBvnCreation(userId: string): Promise<IBvn>{
+        return await this.bvnDB.approveUserBvnCreation(userId)
+    }
 }

@@ -105,7 +105,7 @@ export class UsersDatabaseService {
     newData: object;
   }): Promise<any> {
     const { query, newData } = params;
-    await User.findOneAndUpdate(
+    return await User.findOneAndUpdate(
       query,
       newData,
       { upsert: true }

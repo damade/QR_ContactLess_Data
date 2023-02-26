@@ -21,10 +21,10 @@ export class BvnDatabaseService {
     return await Bvn.find(queryParams);
   }
 
-  async approveUserBvnCreation(uniqueId: string, isApproved: boolean): Promise<IBvn> {
+  async approveUserBvnCreation(uniqueId: string): Promise<IBvn> {
     return await Bvn.findOneAndUpdate(
       { userId: new mongoose.Types.ObjectId(uniqueId) },
-      { isApproved: isApproved }
+      { isApproved: true }
     )
   }
 

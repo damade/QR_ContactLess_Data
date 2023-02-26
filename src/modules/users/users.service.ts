@@ -71,13 +71,13 @@ export class UsersService {
         try {
             const userWithAdditionalFields = (await this.userDB.userWithAdditionalFields(new mongoose.Types.ObjectId(idInput)))[0]
 
-            if(!userWithAdditionalFields){
+            if (!userWithAdditionalFields) {
                 throw new BadRequestException("User Profile Could Not Be Fetched")
             }
 
             return {
                 _id: userWithAdditionalFields._id, user: userWithAdditionalFields.user[0],
-                bvnInfo: userWithAdditionalFields.bvnInfo[0] ? userWithAdditionalFields.bvnInfo[0]: null,
+                bvnInfo: userWithAdditionalFields.bvnInfo[0] ? userWithAdditionalFields.bvnInfo[0] : null,
                 bankInfo: userWithAdditionalFields.bankInfo[0]
             }
         }
@@ -242,21 +242,34 @@ export class UsersService {
 
     async approvedBankInfos(): Promise<IUser[] | null> {
         return await this.userDB.approvedBankInfos();
-      }
-    
-      async unApprovedBankInfos(): Promise<IUser[] | null> {
+    }
+
+    async unApprovedBankInfos(): Promise<IUser[] | null> {
         return await this.userDB.unApprovedBankInfos();
-      }
-    
-      async approvedBvns(): Promise<IUser[] | null> {
+    }
+
+    async approvedBvns(): Promise<IUser[] | null> {
         return await this.userDB.approvedBvns();
-      }
-    
-      async unApprovedBvns(): Promise<IUser[] | null> {
+    }
+
+    async unApprovedBvns(): Promise<IUser[] | null> {
         return await this.userDB.unApprovedBvns();
-      }
+    }
 
 
+    async updateApprovedAccountCreation(userId: string): Promise<IUser> {
+        try {
+            const userIdObject = new mongoose.Types.ObjectId(userId)
+            return await this.userDB.updateUser(
+                {
+                    query: { _id: userIdObject },
+                    newData: { hasAccountBeenApproved: true, hasBvnBeenApproved: true},
+                });
+        }
+        catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
 
 
 }

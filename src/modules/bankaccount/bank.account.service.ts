@@ -324,11 +324,15 @@ export class BankAccountService {
         };
     }
 
-    async findUnapprovedBvns(): Promise<IBankAccount[]>{
+    async findUnapprovedBankInfos(): Promise<IBankAccount[]>{
        return await this.bankAccountDB.unApprovedBankInfos()
     }
 
-    async findApprovedBvns(): Promise<IBankAccount[]>{
+    async findApprovedBankInfos(): Promise<IBankAccount[]>{
         return await this.bankAccountDB.approvedBankInfos()
      }
+
+     async approveUserBankAccountCreation(uniqueId: string): Promise<IBankAccount> {
+        return await this.bankAccountDB.approveUserBankAccountCreation(uniqueId)
+      }
 }

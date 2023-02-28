@@ -39,6 +39,19 @@ export class UserController {
         return data
     }
 
+    @Get('profile-link')
+    @HttpCode(HttpStatus.OK)
+    async getProfileAndQrCode(@Request() req) {
+        const profile = await this.userService.getUserProfile(req.user._id);
+        const qrUrl = await this.userService.fetchUserQrData(req.user._id)
+        // return the user and the token
+        const data: ApiData = {
+            success: true, message: "User Profile Fetched Successfully",
+            payload: { profile, qrUrl }
+        };
+        return data
+    }
+
     @Get('qr-code')
     @HttpCode(HttpStatus.OK)
     async getQrUrl(@Request() req) {

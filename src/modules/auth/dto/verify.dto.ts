@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsOptional, IsEmail, IsPhoneNumber, Length, IsNumberString, ValidateIf, IsBoolean, IsBooleanString } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsEmail, IsPhoneNumber, Length, IsNumberString, ValidateIf, IsBooleanString } from 'class-validator';
 
 
 export class VerifyDto {

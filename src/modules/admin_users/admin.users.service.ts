@@ -1,4 +1,4 @@
-import { ForbiddenException, HttpException, HttpStatus, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import mongoose from 'mongoose';
 import { getErrorMessage } from 'src/core/utils/helpers/error.helper';
 import { CipherService } from 'src/core/utils/service/cipher.service';
@@ -15,6 +15,7 @@ import { BankAccountService } from '../bankaccount/bank.account.service';
 import { BvnService } from '../bvn/bvn.service';
 import { UsersService } from '../users/users.service';
 import { RequestForApprovalDto } from './dto/req.approval.dto';
+import { genericExclude } from 'src/core/utils/helpers/prisma.helper';
 
 @Injectable()
 export class AdminUsersService {
@@ -222,5 +223,18 @@ export class AdminUsersService {
         )
 
         return updatedUser
+    }
+
+    async getCustomerInfo(uniqueId: string, userId: string) {
+        const user = await this.customerService.findOneByParams({
+            uniqueId,
+            _id: new mongoose.Types.ObjectId(userId),
+        })
+
+        if (!user) {
+            throw new BadRequestException("No User Found/Matched")
+        }
+
+        return genericExclude(user.toJSON(),"bearerToken","__v")
     }
 }

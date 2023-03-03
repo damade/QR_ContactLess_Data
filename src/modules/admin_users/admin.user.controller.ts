@@ -1,6 +1,7 @@
 import {
     Controller, Body, Request, HttpCode, HttpStatus, Patch,
-    Get} from '@nestjs/common';
+    Get,
+    Query} from '@nestjs/common';
 import { AppLogger } from 'src/core/logger/logger';
 import { ApiData } from 'src/core/model/api.data';
 import { AdminUserPasswordChangeDto } from './dto/admin.user.pin.update.dto';
@@ -14,7 +15,21 @@ export class AdminUserController {
         private readonly userService: AdminUsersService,
         private readonly appLogger: AppLogger
     ) { }
+    
+    @Get('user-profile')
+    @HttpCode(HttpStatus.CREATED)
+    async getUserProfile(@Query("uniqueId") uniqueId, @Query("userId") userId) {
 
+        const user = await this.userService.getCustomerInfo(uniqueId, userId);
+
+        // return the update user
+        const data: ApiData = {
+            success: true, message: "User Info Fetched Successfully",
+            payload: {user}
+        };
+        
+        return data
+    }  
 
     @Patch('bvn-approval')
     @HttpCode(HttpStatus.CREATED)

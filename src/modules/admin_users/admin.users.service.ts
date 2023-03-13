@@ -134,6 +134,14 @@ export class AdminUsersService {
         };
     }
 
+    async findOneByPhoneNumberOrEmailOrStaffId(phoneNumber: string, email: string, staffId: string): Promise<IAdminUser> {
+        try {
+            return await this.userDB.userByPhoneNumberOrEmailOrStaffId(phoneNumber, email, staffId)
+        } catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        };
+    }
+
     async findOneById(idInput: string): Promise<IAdminUser> {
         try {
             return await this.userDB.adminUser(idInput)
@@ -257,12 +265,12 @@ export class AdminUsersService {
         }
 
         const userWithAdditionalFields = await this.customerService
-            .findOneByUserIdAdditional(userId)
-
+            .getUserProfile(userId)
+            
         if (!user || !userWithAdditionalFields) {
             throw new BadRequestException("No User Found/Matched")
         }
 
-        return genericExclude(userWithAdditionalFields.toJSON(), "bearerToken", "__v")
+        return genericExclude(userWithAdditionalFields)
     }
 }

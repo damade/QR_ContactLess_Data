@@ -36,6 +36,19 @@ export class AdminUsersDatabaseService {
     );
   }
 
+  async userByPhoneNumberOrEmailOrStaffId(userPhoneNumber: string, userEmail: string, staffId: string): Promise<IAdminUser | null> {
+    return await AdminUser.findOne({
+      $or: [{
+        phoneNumber: userPhoneNumber
+      }, {
+        email: userEmail
+      }, {
+        staffId
+      }]
+    }
+    );
+  }
+
   async users(params: {
     skip?: number;
     limit?: number;

@@ -49,7 +49,7 @@ const userSchema = new Schema({
     },
     staffId: {
         type: String,
-        required: true
+        required: true, 
     },
     gender: {
         type: String,

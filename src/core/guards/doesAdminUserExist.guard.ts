@@ -14,8 +14,8 @@ export class DoesAdminUserExist implements CanActivate {
     }
 
     async validateRequest(request) {
-        const userExist = await this.userService.findOneByPhoneNumberOrEmail(request.body.phoneNumber,
-            request.body.email);
+        const userExist = await this.userService.findOneByPhoneNumberOrEmailOrStaffId(request.body.phoneNumber,
+            request.body.email, request.body.staffId);
         if (userExist) {
             throw new ForbiddenException('This user already has an account, kindly login with your existing credentials');
         }

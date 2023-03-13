@@ -9,6 +9,7 @@ export function mapToAdminUser(userModel: AdminUserDto): IAdminUser {
         email: userModel.email,
         title: userModel.title,
         firstName: userModel.firstName,
+        staffId: userModel.staffId,
         lastName: userModel.lastName,
         fullName: userModel.firstName + " " + userModel.lastName,
         gender: userModel.gender,

@@ -20,9 +20,9 @@ export class AdminAuthService {
         private readonly otpService: OtpService,
     ) { }
 
-    async validateUser(phoneNumber: string, inputPassword: string, email: string) {
+    async validateUser(phoneNumber: string, inputPassword: string, email: string, staffId: string) {
         // find if user exist with this email
-        const user = await this.userService.findOneByPhoneNumberOrEmail(phoneNumber, email);
+        const user = await this.userService.findOneByPhoneNumberOrEmailOrStaffId(phoneNumber, email, staffId);
         if (!user) {
             return null;
         }
@@ -60,7 +60,7 @@ export class AdminAuthService {
     public async createAdminUser(adminUserModel: AdminUserDto) {
         const otps = await this.otpService.getEmailOTP(adminUserModel.email)
         if (!(otps) || otps.length < 1) {
-            throw new BadRequestException('Otp has not been sent to the Email');
+            throw new BadRequestException('Otp has not been verified.');
         }
         try {
 

@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString, IsOptional, IsEmail, IsPhoneNumber, Length, IsNumberString, ValidateIf, IsBooleanString } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsEmail, IsPhoneNumber, Length, IsNumberString, ValidateIf, IsBooleanString, IsEnum } from 'class-validator';
+import { AccountType, NextOfKinRelationship } from 'src/core/constants';
 
 
 export class VerifyDto {
@@ -44,6 +45,37 @@ export class VerifyDto {
     @IsOptional()
     @IsString()
     readonly taxIdentificationNumber: string;
+
+    @IsNotEmpty()
+    @IsString()
+    readonly nextOfKinFullName: string;
+
+    @IsNotEmpty()
+    @IsString()
+    readonly nextOfKinAddress: string;
+
+    @IsNotEmpty()
+    @IsEmail()
+    @IsString()
+    readonly nextOfKinEmail: string;
+
+    @IsNotEmpty()
+    @IsPhoneNumber('NG',{
+        message: "Invalid Phone Number"
+    })
+    readonly nextOfKinPhoneNumber: string;
+
+    @IsNotEmpty()
+    @IsEnum(NextOfKinRelationship, {
+        message: 'Relationship kind not listed.',
+    })
+    readonly nextOfKinRelationship: NextOfKinRelationship;
+
+    @IsNotEmpty()
+    @IsEnum(AccountType, {
+        message: 'Account Type Not Accepted.',
+    })
+    readonly accountType: AccountType;
 
     @IsNotEmpty()
     @IsBooleanString()

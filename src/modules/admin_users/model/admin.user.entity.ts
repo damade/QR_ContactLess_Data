@@ -9,6 +9,7 @@ export interface IAdminUser extends Document {
     firstName: string;
     lastName: string;
     fullName: string;
+    staffId: string;
     gender: Gender;
     bankBranch: BankBranch;
     password: string;
@@ -43,6 +44,10 @@ const userSchema = new Schema({
         required: true
     },
     fullName: {
+        type: String,
+        required: true
+    },
+    staffId: {
         type: String,
         required: true
     },

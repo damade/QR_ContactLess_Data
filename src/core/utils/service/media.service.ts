@@ -113,7 +113,7 @@ export class MediaService {
       }
 
       if(imageUrl){
-        this.deleteImage(imageUrl)
+       await this.deleteImage(imageUrl)
       }
 
       this.appLogger.log(internalResult.public_id)
@@ -158,8 +158,8 @@ export class MediaService {
  private async internalImageDeleter(
     publicId: string,
   ) {
-    return cloudinary.uploader.destroy(publicId, function (result) { 
-      this.appLogger.log(result) 
+    return await cloudinary.uploader.destroy(publicId, function (result) { 
+      console.log(result) 
       return result
     });
   }

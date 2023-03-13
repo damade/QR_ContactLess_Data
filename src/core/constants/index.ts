@@ -80,6 +80,14 @@ export enum STATE{
     Zamfara
 }
 
+export enum NextOfKinRelationship {
+  Father, Mother, Son, Daughter, Sibling, Others
+}
+
+export enum AccountType {
+  Savings, Current
+}
+
 export const stateLg = [
     {
       "state": "Adamawa",

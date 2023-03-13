@@ -3,4 +3,5 @@ interface String {
     getValueOrUndefined(): any;
     isEmptyOrNull(): boolean;
     isNotEmptyOrNull(): boolean;
+    getValueOrDefaultString(): string;
 }

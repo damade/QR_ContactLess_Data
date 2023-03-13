@@ -8,6 +8,7 @@ import { AdminUserPasswordChangeDto } from './dto/admin.user.pin.update.dto';
 import { AdminUsersService } from './admin.users.service';
 import { genericExclude } from 'src/core/utils/helpers/prisma.helper';
 import { RequestForApprovalDto } from './dto/req.approval.dto';
+import { RequestForDisapprovalDto } from './dto/req.disapproval.dto';
 
 @Controller('admin')
 export class AdminUserController {
@@ -44,7 +45,22 @@ export class AdminUserController {
         };
         
         return data
-    }    
+    }  
+    
+    @Patch('disapprove')
+    @HttpCode(HttpStatus.CREATED)
+    async disapproveAccountCreation(@Body() reqForApproval: RequestForDisapprovalDto) {
+
+        await this.userService.disapprove(reqForApproval);
+
+        // return the update user
+        const data: ApiData = {
+            success: true, message: "Account Has Been Disapproved Successfully, kindly modify your info.",
+            payload: {}
+        };
+        
+        return data
+    }  
 
     @Patch('bank-approval')
     async approveBankInfo(@Body()reqForApproval: RequestForApprovalDto) {

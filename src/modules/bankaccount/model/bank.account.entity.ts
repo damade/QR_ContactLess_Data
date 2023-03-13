@@ -1,4 +1,5 @@
 import { Schema, Types, model, Document } from 'mongoose';
+import { AccountType, NextOfKinRelationship } from 'src/core/constants';
 
 export interface IBankAccount extends Document {
     motherMaidenName: string;
@@ -8,6 +9,12 @@ export interface IBankAccount extends Document {
     nin: string;
     ninIndex: string;
     userImage: string;
+    accountType: string;
+    nextOfKinFullName: string;
+    nextOfKinAddress: string;
+    nextOfKinEmail: string;
+    nextOfKinPhoneNumber: string;
+    nextOfKinRelationship: string;
     walletBalance?: number;
     isProfileComplete?: boolean;
     userId: string;
@@ -39,6 +46,32 @@ const bankAccountSchema = new Schema({
         required: true
     },
     userImage: {
+        type: String,
+        required: true
+    },
+    nextOfKinRelationship: {
+        type: String,
+        required: true,
+        enum: NextOfKinRelationship
+    },
+    accountType: {
+        type: String,
+        required: true,
+        enum: AccountType
+    },
+    nextOfKinFullName: {
+        type: String,
+        required: true
+    },
+    nextOfKinAddress: {
+        type: String,
+        required: true
+    },
+    nextOfKinEmail: {
+        type: String,
+        required: true
+    },
+    nextOfKinPhoneNumber: {
         type: String,
         required: true
     },

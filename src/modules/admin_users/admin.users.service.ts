@@ -16,6 +16,7 @@ import { BvnService } from '../bvn/bvn.service';
 import { UsersService } from '../users/users.service';
 import { RequestForApprovalDto } from './dto/req.approval.dto';
 import { genericExclude } from 'src/core/utils/helpers/prisma.helper';
+import { RequestForDisapprovalDto } from './dto/req.disapproval.dto';
 
 @Injectable()
 export class AdminUsersService {
@@ -225,6 +226,26 @@ export class AdminUsersService {
         return updatedUser
     }
 
+    async disapprove(requestDto: RequestForDisapprovalDto) {
+        const user = await this.customerService.findOneByParams({
+            uniqueId: requestDto.uniqueId,
+            email: requestDto.email,
+            phonNumber: requestDto.phoneNumber,
+            _id: new mongoose.Types.ObjectId(requestDto.userId),
+            isCreatingAccount: true,
+            hasAccountBeenApproved: false, hasBvnBeenApproved: false
+        })
+
+        if (!user) {
+            throw new UnprocessableEntityException("User Info Does Not Match or Bvn has been Approved")
+        }
+
+        return await this.customerService.disapprovedAccountCreation(
+            user._id, requestDto.isProfileImageTheIssue, requestDto.comment
+        )
+
+    }
+
     async getCustomerInfo(uniqueId: string, userId: string) {
         const user = await this.customerService.findOneByParams({
             uniqueId,
@@ -235,6 +256,13 @@ export class AdminUsersService {
             throw new BadRequestException("No User Found/Matched")
         }
 
-        return genericExclude(user.toJSON(),"bearerToken","__v")
+        const userWithAdditionalFields = await this.customerService
+            .findOneByUserIdAdditional(userId)
+
+        if (!user || !userWithAdditionalFields) {
+            throw new BadRequestException("No User Found/Matched")
+        }
+
+        return genericExclude(userWithAdditionalFields.toJSON(), "bearerToken", "__v")
     }
 }

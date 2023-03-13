@@ -31,6 +31,9 @@ export interface IUser extends Document {
     state: string;
     hasAccountBeenApproved?: boolean;
     hasBvnBeenApproved?: boolean;
+    shouldSignatureImageBeReuploaded?: boolean;
+    shouldProfileImageBeReuploaded?: boolean;
+    rejectionComment?: string; 
 }
 
 const userSchema = new Schema({
@@ -115,10 +118,17 @@ const userSchema = new Schema({
     bearerToken: {
         type: String,
         required: false
+
+    },
+    rejectionComment: {
+        type: String,
+        required: false,
+        default: " "
     },
     isCreatingBvn: {
         type: Boolean,
-        required: false
+        required: false,
+        default: false
     },
     hasBvnBeenApproved: {
         type: Boolean,
@@ -127,9 +137,20 @@ const userSchema = new Schema({
     },
     isCreatingAccount: {
         type: Boolean,
-        required: false
+        required: false,
+        default: false
     },
     hasAccountBeenApproved: {
+        type: Boolean,
+        required: false,
+        default: false,
+    },
+    shouldSignatureImageBeReuploaded: {
+        type: Boolean,
+        required: false,
+        default: false,
+    },
+    shouldProfileImageBeReuploaded: {
         type: Boolean,
         required: false,
         default: false,

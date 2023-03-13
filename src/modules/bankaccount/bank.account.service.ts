@@ -122,7 +122,7 @@ export class BankAccountService {
                             ninIndex: ninIndexRequest
                         })
                     );
-                    return {user , bankInfo: createdBankAccount["_doc"]}
+                    return { user, bankInfo: createdBankAccount["_doc"] }
                 })
                 .catch(error => {
                     throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
@@ -185,7 +185,7 @@ export class BankAccountService {
         }
     }
 
-    async createBankAccountOnlyWithoutImage(bankAccountDto: BankProfileDto, userId: string, 
+    async createBankAccountOnlyWithoutImage(bankAccountDto: BankProfileDto, userId: string,
         generatedBvn: string): Promise<IBankAccount> {
         try {
             // Check For existing NIN
@@ -324,15 +324,42 @@ export class BankAccountService {
         };
     }
 
-    async findUnapprovedBankInfos(): Promise<IBankAccount[]>{
-       return await this.bankAccountDB.unApprovedBankInfos()
+    async findUnapprovedBankInfos(): Promise<IBankAccount[]> {
+        return await this.bankAccountDB.unApprovedBankInfos()
     }
 
-    async findApprovedBankInfos(): Promise<IBankAccount[]>{
+    async findApprovedBankInfos(): Promise<IBankAccount[]> {
         return await this.bankAccountDB.approvedBankInfos()
-     }
+    }
 
-     async approveUserBankAccountCreation(uniqueId: string): Promise<IBankAccount> {
+    async approveUserBankAccountCreation(uniqueId: string): Promise<IBankAccount> {
         return await this.bankAccountDB.approveUserBankAccountCreation(uniqueId)
-      }
+    }
+
+    async updateProfileImage(profileImage: Express.Multer.File, uniqueId: string): Promise<IBankAccount> {
+        try {
+
+            // Check if profile image file is empty
+            if (!profileImage) {
+                throw new HttpException("Please add your image for Identity", HttpStatus.BAD_REQUEST);
+            }
+
+            const currentUserInfo = await this.bankAccountDB.bankAccountInfoByUserId(uniqueId)
+
+            var fileLink = await this.mediaService.uploadImageAndDelete(profileImage, currentUserInfo.userImage)
+                .catch(
+                    error => {
+                        throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+                    });
+
+            return await this.bankAccountDB.updateBankInfoViaUserIdOnly({
+                uniqueId,
+                newData: { userImage: fileLink }
+            })
+
+        }
+        catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
 }

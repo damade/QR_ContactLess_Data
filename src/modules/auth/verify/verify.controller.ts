@@ -32,13 +32,19 @@ export class VerificationController {
     async verifyUserDetails(@UploadedFile(
         new ParseFilePipeBuilder()
             .addMaxSizeValidator({
-                maxSize: 2500000
+                maxSize: 5500000
             })
             .build({
-                errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+                errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
             })
     ) signatureImage: Express.Multer.File, @Body() userVerifyDto: UserVerifyDto) {
         return await this.verifyService.verifyUserDetails(signatureImage, userVerifyDto);
+    }
+
+    @Post('verify/basic-info')
+    @HttpCode(HttpStatus.OK)
+    async verifyUserHasAccount(@Body() userVerifyDto: OtpRequestDto) {
+        return await this.verifyService.verifyHasAccount(userVerifyDto);
     }
 
     @UseInterceptors(FileInterceptor('identityImage'))
@@ -47,7 +53,7 @@ export class VerificationController {
     async verifyUserBankInfo(@UploadedFile(
         new ParseFilePipeBuilder()
             .addMaxSizeValidator({
-                maxSize: 2500000
+                maxSize: 5500000
             })
             .build({
                 errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY

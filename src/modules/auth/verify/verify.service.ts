@@ -10,6 +10,7 @@ import { BankAccountService } from '../../bankaccount/bank.account.service';
 import { AddressDto } from '../../users/dto/address.dto';
 import { UserVerifyDto } from '../../users/dto/user.verify.dto';
 import { UsersService } from '../../users/users.service';
+import { OtpRequestDto } from '../dto/otp.dto';
 import { VerifyDto } from '../dto/verify.dto';
 
 @Injectable()
@@ -46,6 +47,17 @@ export class VerifyService {
             throw new HttpException("Please add the image of your signature", HttpStatus.BAD_REQUEST);
         }
         const data: ApiData = { success: true, message: "Data Verified successfully", payload: userVerifyDto }
+        return data
+
+    }
+
+    async verifyHasAccount(userVerifyDto: OtpRequestDto): Promise<ApiData> {
+        const userExist = await this.userService.findOneByPhoneNumberOrEmail(userVerifyDto.phoneNumber,
+            userVerifyDto.email);
+        if (userExist) {
+            throw new ForbiddenException('This user already has an account via the email or phone number, you can not create an account anymore');
+        }
+        const data: ApiData = { success: true, message: "Data Verified successfully", payload: {} }
         return data
 
     }

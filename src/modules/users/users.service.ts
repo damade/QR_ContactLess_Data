@@ -263,7 +263,7 @@ export class UsersService {
             return await this.userDB.updateUser(
                 {
                     query: { _id: userIdObject },
-                    newData: { hasAccountBeenApproved: true, hasBvnBeenApproved: true},
+                    newData: { hasAccountBeenApproved: true, hasBvnBeenApproved: true },
                 });
         }
         catch (error) {
@@ -271,5 +271,56 @@ export class UsersService {
         }
     }
 
+    async disapprovedAccountCreation(userId: string, isProfileImageTheIssue: boolean, comment?: string,): Promise<IUser> {
+        try {
+            const userIdObject = new mongoose.Types.ObjectId(userId)
+            if (isProfileImageTheIssue) {
+                return await this.userDB.updateUser(
+                    {
+                        query: { _id: userIdObject },
+                        newData: {
+                            shouldProfileImageBeReuploaded: true,
+                            rejectionComment: comment.getValueOrDefaultString()
+                        },
+                    });
+            }
+            else {
+                return await this.userDB.updateUser(
+                    {
+                        query: { _id: userIdObject },
+                        newData: { shouldSignatureImageBeReuploaded: true, rejectionComment: comment.getValueOrDefaultString() },
+                    });
+            }
+        }
+        catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
 
+
+    async updateSignature(signatureFile: Express.Multer.File, userId: string): Promise<IUser> {
+        try {
+            if (!signatureFile) {
+                throw new HttpException("Please add your Image Of your Signature", HttpStatus.BAD_REQUEST);
+            }
+
+            const currentUserInfo = await this.userDB.user(userId)
+
+            // hash the password
+            var fileLink = await this.mediaService.uploadImageAndDelete(signatureFile, currentUserInfo.signatureUrl)
+                .catch(
+                    error => {
+                        throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+                    });
+            const userIdObject = new mongoose.Types.ObjectId(userId)
+            return await this.userDB.updateUser(
+                {
+                    query: { _id: userIdObject },
+                    newData: { signatureUrl: fileLink },
+                });
+        }
+        catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
 }

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsEmail, IsEnum, IsPhoneNumber, Length, IsString, Matches } from 'class-validator';
+import { IsNotEmpty, IsEmail, IsEnum, IsPhoneNumber, Length, IsString, Matches, Contains } from 'class-validator';
 import { BankBranch, Gender, Title } from 'src/core/constants';
 
 
@@ -37,6 +37,13 @@ export class AdminUserDto {
     @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {message: 'Password too weak'})
     @IsString()
     readonly password: string;
+
+    @IsNotEmpty()
+    @Length(6, 6, {
+        message: "Staff Id has to be six letters"
+    })
+    @IsString()
+    readonly staffId: string;
 
     @IsNotEmpty()
     @IsEnum(Gender, {

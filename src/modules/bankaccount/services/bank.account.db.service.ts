@@ -17,6 +17,13 @@ export class BankAccountDatabaseService {
     }).populate('userId')
   }
 
+  async bankAccountInfoByUserId(uniqueId: string):
+    Promise<IBankAccount | null> {
+    return await BankAccount.findOne({
+      userId: new mongoose.Types.ObjectId(uniqueId)
+    })
+  }
+
   async checkBankInfosByParams(queryParams: object): Promise<IBankAccount[] | null> {
     return await BankAccount.find(queryParams);
   }
@@ -90,7 +97,9 @@ export class BankAccountDatabaseService {
     return await BankAccount.findOneAndUpdate(
       { userId: new mongoose.Types.ObjectId(uniqueId) },
       newData,
-    )
+    ).then(() => {
+      return this.bankAccountInfoByUserId(uniqueId)
+    })
   }
 
   async deleteBankInfo(id: string): Promise<IBankAccount> {

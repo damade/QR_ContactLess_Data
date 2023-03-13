@@ -10,6 +10,12 @@ export function mapToBankAcount(bankAccountModel: BankProfileDto): IBankAccount 
         nin: bankAccountModel.nin,
         ninIndex: bankAccountModel.ninIndex,
         userImage: bankAccountModel.userImage,
+        nextOfKinAddress: bankAccountModel.nextOfKinAddress,
+        nextOfKinEmail: bankAccountModel.nextOfKinEmail,
+        nextOfKinFullName: bankAccountModel.nextOfKinFullName,
+        nextOfKinPhoneNumber: bankAccountModel.nextOfKinPhoneNumber,
+        nextOfKinRelationship: bankAccountModel.nextOfKinRelationship,
+        accountType: bankAccountModel.accountType,
         userId: bankAccountModel.userId
     })
 }

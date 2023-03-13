@@ -49,13 +49,13 @@ export class AdminAuthController {
     @Post('sendonly-otp')
     @HttpCode(HttpStatus.CREATED)
     async sendOnlyOtp(@Body() otpReq: OtpRequestDto) {
-        return await this.authService.sendOtp(otpReq.phoneNumber, otpReq.email);
+        return await this.authService.sendOtp(otpReq.phoneNumber, otpReq.email, false);
     }
 
     @Post('register/resend-otp')
     @HttpCode(HttpStatus.CREATED)
     async resendOtp(@Body() otpReq: OtpRequestDto) {
-        return await this.authService.sendOtp(otpReq.phoneNumber, otpReq.email);
+        return await this.authService.sendOtp(otpReq.phoneNumber, otpReq.email, false);
     }
 
     @Post('register/verify-otp')
@@ -67,7 +67,7 @@ export class AdminAuthController {
     @Post(['forgot-pin/send-otp', 'send-otp'])
     @HttpCode(HttpStatus.CREATED)
     async sendForgottenPasswordOtp(@Body() otpReq: OtpEmailRequestDto) {
-        return await this.authService.sendForgottenPasswordOtp(otpReq.email);
+        return await this.authService.sendForgottenPasswordOtp(otpReq.email, true);
     }
 
     @Post(['forgot-pin/verify-otp', 'verify-otp'])

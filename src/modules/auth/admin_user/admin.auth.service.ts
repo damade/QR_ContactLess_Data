@@ -107,13 +107,13 @@ export class AdminAuthService {
         }
     }
 
-    async sendOtp(phoneNumber: string, emailAddress: string) {
+    async sendOtp(phoneNumber: string, emailAddress: string, isLogin: boolean) {
         const user = await this.userService.findOneByPhoneNumberOrEmail(phoneNumber, emailAddress);
         if (user) {
             throw new ForbiddenException('This phone number or email exist as a registered user');
         }
         try {
-            await this.otpService.sendEmailOtp(phoneNumber, emailAddress)
+            await this.otpService.sendAdminEmailOtp(phoneNumber, emailAddress, isLogin)
             const data: ApiData = { success: true, message: "OTP sent", payload: {} }
             return data
         } catch (error) {
@@ -121,13 +121,13 @@ export class AdminAuthService {
         }
     }
 
-    async sendForgottenPasswordOtp(emailAddress: string) {
+    async sendForgottenPasswordOtp(emailAddress: string, isLogin: boolean) {
         const user = await this.userService.findOneByEmail(emailAddress);
         if (!user) {
             throw new ForbiddenException('This email does not exist as a registered user');
         }
         try {
-            await this.otpService.sendEmailOtp(user.phoneNumber, emailAddress)
+            await this.otpService.sendAdminEmailOtp(user.phoneNumber, emailAddress, isLogin)
             const data: ApiData = { success: true, message: "OTP sent", payload: {} }
             return data
         } catch (error) {
@@ -170,7 +170,7 @@ export class AdminAuthService {
             if (errorMessage.length > 1 && errorMessage) {
                 throw new ForbiddenException(errorMessage);
             }
-            await this.otpService.sendEmailOtp(userRequest.phoneNumber, userRequest.email)
+            await this.otpService.sendAdminEmailOtp(userRequest.phoneNumber, userRequest.email, false)
             const data: ApiData = { success: true, message: "OTP sent", payload: {} }
             return data
         } catch (error) {

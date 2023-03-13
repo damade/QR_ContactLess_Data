@@ -1,6 +1,10 @@
 import {
     Controller, Body, Request, HttpCode, HttpStatus, Patch,
-    Get} from '@nestjs/common';
+    Get,
+    UploadedFile,
+    ParseFilePipeBuilder,
+    UseInterceptors} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AppLogger } from 'src/core/logger/logger';
 import { ApiData } from 'src/core/model/api.data';
 import { UserPasswordChangeDto } from './dto/user.pin.update.dto';
@@ -64,6 +68,27 @@ export class UserController {
         return data
     }
 
+    @UseInterceptors(FileInterceptor('signatureImage'))
+    @Patch('upload-signature')
+    @HttpCode(HttpStatus.OK)
+    async uploadSignatureImage(@UploadedFile(
+        new ParseFilePipeBuilder()
+            .addMaxSizeValidator({
+                maxSize: 5500000
+            })
+            .build({
+                errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
+            })
+    ) signatureImage: Express.Multer.File, @Request() req) {
+        const userInfo = await this.userService.updateSignature(signatureImage, req.user._id);
+        // return the user and the token
+        const data: ApiData = {
+            success: true, message: "User Signature Updated Successfully",
+            payload: { userInfo }
+        };
+        return data
+    }
+
     @Get('identification-list')
     @HttpCode(HttpStatus.OK)
     async getIdentificationList() {
@@ -77,6 +102,4 @@ export class UserController {
         };
         return data
     }
-
-
 }

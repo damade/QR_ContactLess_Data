@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppLogger } from 'src/core/logger/logger';
 import { ApiData } from 'src/core/model/api.data';
@@ -27,7 +27,7 @@ export class AuthService {
         private readonly bvnService: BvnService,
         private readonly appLogger: AppLogger,
         private readonly bankAccountService: BankAccountService,
-        private readonly otpService: OtpService    ) { }
+        private readonly otpService: OtpService) { }
 
     // KEYS
     private apiKeys: string[] = [
@@ -52,7 +52,7 @@ export class AuthService {
             return null;
         }
 
-        const userInJson =user.toJSON()
+        const userInJson = user.toJSON()
 
         // find if user password match
         const match = await this.cipherService.comparePassword(inputPassword, userInJson.password);
@@ -164,20 +164,22 @@ export class AuthService {
             // create the user
             const newUser = await this.bvnService.createWithoutImage(bvnModel)
                 .then(async (userBvnInfo: BvnCreationData) => {
-                  const createBankAccount =  await this.bankAccountService.createBankAccountOnlyWithoutImage(
+                    const createBankAccount = await this.bankAccountService.createBankAccountOnlyWithoutImage(
                         bvnModel.bankProfile,
                         userBvnInfo.user._id,
                         userBvnInfo.bvnInfo.bvn
                     );
-                    return {user: userBvnInfo.user, bankInfo: createBankAccount["_doc"], bvnInfo: userBvnInfo.bvnInfo}
+                    return { user: userBvnInfo.user, bankInfo: createBankAccount["_doc"], bvnInfo: userBvnInfo.bvnInfo }
                 });
 
             // extract info not needed
             const { bvn, bvnIndex, nin, userId, _id, __v, ninIndex, taxIdentificationNumber, ...result } = newUser.bankInfo
 
             // // return the user and the token
-            const data: ApiData = { success: true, message: "Account Created Successfully, kindly got to your nearest bank for approval",
-             payload: { user: newUser.user, bankInfo: result, bvnInfo: genericExclude(newUser.bvnInfo, "userId","_id","__v") } };
+            const data: ApiData = {
+                success: true, message: "Account Created Successfully, kindly got to your nearest bank for approval",
+                payload: { user: newUser.user, bankInfo: result, bvnInfo: genericExclude(newUser.bvnInfo, "userId", "_id", "__v") }
+            };
             return data
         } catch (error) {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
@@ -202,8 +204,10 @@ export class AuthService {
             const { bvn, bvnIndex, nin, userId, ninIndex, taxIdentificationNumber, ...bankInfoResult } = newUser.bankInfo
 
             // // return the user and the token
-            const data: ApiData = { success: true, message: "Bank Account Created Successfully, kindly got to your nearest bank for approval",
-             payload: { user: newUser.user, bankInfo: bankInfoResult } };
+            const data: ApiData = {
+                success: true, message: "Bank Account Created Successfully, kindly got to your nearest bank for approval",
+                payload: { user: newUser.user, bankInfo: bankInfoResult }
+            };
             return data
         } catch (error) {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
@@ -219,6 +223,12 @@ export class AuthService {
         const userResult = await this.userService.findOneByEmail(user.email);
         if (!userResult) {
             throw new ForbiddenException('This email does not exist as a registered user');
+        }
+
+        const isTheSamePassword: boolean = await this.cipherService.comparePassword(user.password, userResult.password)
+
+        if (isTheSamePassword) {
+            throw new UnprocessableEntityException("Password has been used previously.")
         }
         // hash the password
         const pass = await this.cipherService.hashPassword(user.password);
@@ -287,7 +297,7 @@ export class AuthService {
             throw new ForbiddenException('This email does not exist as a registered user');
         }
         try {
-            await this.otpService.sendEmailOtp(user.phoneNumber, emailAddress)
+            await this.otpService.sendForgotPasswordEmailOtp(user.phoneNumber, emailAddress)
             const data: ApiData = { success: true, message: "OTP sent", payload: {} }
             return data
         } catch (error) {

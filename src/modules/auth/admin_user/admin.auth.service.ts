@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, HttpException, HttpStatus, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AppLogger } from 'src/core/logger/logger';
 import { ApiData } from 'src/core/model/api.data';
@@ -8,6 +8,7 @@ import { OtpService } from 'src/core/utils/service/otp.service';
 import { AdminUsersService } from 'src/modules/admin_users/admin.users.service';
 import { AdminUserDto } from 'src/modules/admin_users/dto/admin.user.dto';
 import { UserPasswordDto } from '../../users/dto/user.pin.dto';
+import { AdminPasswordRequestDto } from '../dto/admin.user.info.dto';
 
 @Injectable()
 export class AdminAuthService {
@@ -87,6 +88,13 @@ export class AdminAuthService {
         if (!userResult) {
             throw new ForbiddenException('This email does not exist as a registered user');
         }
+
+        const isTheSamePassword: boolean = await this.cipherService.comparePassword(user.password, userResult.password)
+
+        if (isTheSamePassword) {
+            throw new UnprocessableEntityException("Password has been used previously.")
+        }
+
         // hash the password
         const pass = await this.cipherService.hashPassword(user.password);
 
@@ -121,13 +129,33 @@ export class AdminAuthService {
         }
     }
 
-    async sendForgottenPasswordOtp(emailAddress: string, isLogin: boolean) {
+    async sendLoginOtp(emailAddress: string, isLogin: boolean) {
         const user = await this.userService.findOneByEmail(emailAddress);
         if (!user) {
             throw new ForbiddenException('This email does not exist as a registered user');
         }
         try {
             await this.otpService.sendAdminEmailOtp(user.phoneNumber, emailAddress, isLogin)
+            const data: ApiData = { success: true, message: "OTP sent", payload: {} }
+            return data
+        } catch (error) {
+            throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    async sendForgottenPasswordOtp(userInfo: AdminPasswordRequestDto) {
+        const user = await this.userService.findOneByParams({
+            phoneNumber: userInfo.phoneNumber,
+            email: userInfo.email,
+            staffId: userInfo.staffId
+        })
+
+        if (!user) {
+            throw new ForbiddenException('This info submitted does not exist as a registered user');
+        }
+
+        try {
+            await this.otpService.sendForgotPasswordEmailOtp(user.phoneNumber, userInfo.email)
             const data: ApiData = { success: true, message: "OTP sent", payload: {} }
             return data
         } catch (error) {

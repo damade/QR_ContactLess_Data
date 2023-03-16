@@ -86,7 +86,7 @@ export class UsersService {
         };
     }
 
-    async updatePassword(user: UserPasswordDto): Promise<IUser> {
+    async  updatePassword(user: UserPasswordDto): Promise<IUser> {
         try {
             const fetchedUser = await this.findOneByEmail(user.email);
             return await this.userDB.updateUser(
@@ -263,7 +263,10 @@ export class UsersService {
             return await this.userDB.updateUser(
                 {
                     query: { _id: userIdObject },
-                    newData: { hasAccountBeenApproved: true, hasBvnBeenApproved: true },
+                    newData: {
+                        hasAccountBeenApproved: true, hasBvnBeenApproved: true,
+                        shouldSignatureImageBeReuploaded: false, shouldProfileImageBeReuploaded: false
+                    },
                 });
         }
         catch (error) {

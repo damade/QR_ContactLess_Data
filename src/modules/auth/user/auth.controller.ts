@@ -104,7 +104,7 @@ export class AuthController {
         return await this.authService.logout(req.user._id);
     }
 
-    @Patch('forgot-pin')
+    @Patch('forgot-password')
     async resetPin(@Body() user: UserPasswordDto) {
         return await this.authService.resetPin(user);
     }
@@ -133,13 +133,13 @@ export class AuthController {
         return await this.authService.verifyOtp(otpVerifyReq.phoneNumber, otpVerifyReq.otp);
     }
 
-    @Post(['forgot-pin/send-otp', 'send-otp'])
+    @Post(['forgot-password/send-otp', 'send-otp'])
     @HttpCode(HttpStatus.CREATED)
     async sendForgottenPasswordOtp(@Body() otpReq: OtpEmailRequestDto) {
         return await this.authService.sendForgottenPasswordOtp(otpReq.email);
     }
 
-    @Post(['forgot-pin/verify-otp', 'verify-otp'])
+    @Post(['forgot-password/verify-otp', 'verify-otp'])
     @HttpCode(HttpStatus.CREATED)
     async verifyForgottenPasswordOtp(@Body() otpVerifyReq: OtpEmailDto) {
         return await this.authService.verifyEmailOtp(otpVerifyReq.email, otpVerifyReq.otp);

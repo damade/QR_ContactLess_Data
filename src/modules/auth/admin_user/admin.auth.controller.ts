@@ -5,6 +5,7 @@ import { DoesAdminUserExist } from 'src/core/guards/doesAdminUserExist.guard';
 import { JwtAuthGuard } from 'src/core/guards/jwt.auth.guard';
 import { AdminUserDto } from 'src/modules/admin_users/dto/admin.user.dto';
 import { UserPasswordDto } from '../../users/dto/user.pin.dto';
+import { AdminPasswordRequestDto } from '../dto/admin.user.info.dto';
 import { OtpRequestDto } from '../dto/otp.dto';
 import { OtpEmailRequestDto } from '../dto/otp.email.dto';
 import { OtpEmailDto } from '../dto/otp.email.verify.dto';
@@ -35,7 +36,7 @@ export class AdminAuthController {
         return await this.authService.logout(req.user._id);
     }
 
-    @Patch('forgot-pin')
+    @Patch('forgot-password')
     async resetPin(@Body() user: UserPasswordDto) {
         return await this.authService.resetPin(user);
     }
@@ -64,13 +65,19 @@ export class AdminAuthController {
         return await this.authService.verifyEmailOtp(otpVerifyReq.email, otpVerifyReq.otp);
     }
 
-    @Post(['forgot-pin/send-otp', 'send-otp'])
+    @Post('send-otp')
     @HttpCode(HttpStatus.CREATED)
-    async sendForgottenPasswordOtp(@Body() otpReq: OtpEmailRequestDto) {
-        return await this.authService.sendForgottenPasswordOtp(otpReq.email, true);
+    async sendLoginOtp(@Body() otpReq: OtpEmailRequestDto) {
+        return await this.authService.sendLoginOtp(otpReq.email, true);
     }
 
-    @Post(['forgot-pin/verify-otp', 'verify-otp'])
+    @Post('forgot-password/send-otp')
+    @HttpCode(HttpStatus.CREATED)
+    async sendForgottenPasswordOtp(@Body() otpReq: AdminPasswordRequestDto) {
+        return await this.authService.sendForgottenPasswordOtp(otpReq);
+    }
+
+    @Post(['forgot-password/verify-otp', 'verify-otp'])
     @HttpCode(HttpStatus.CREATED)
     async verifyForgottenPasswordOtp(@Body() otpVerifyReq: OtpEmailDto) {
         return await this.authService.verifyEmailOtp(otpVerifyReq.email, otpVerifyReq.otp);

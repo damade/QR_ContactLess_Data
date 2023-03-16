@@ -27,6 +27,15 @@ export class EmailService {
         }
     }
 
+    private sendForgotPasswordMessage = (emailAddr: string, otp: string) => {
+        return {
+            from: '"E2Z Bank" <no_reply@e2zbank.com>',
+            to: emailAddr,
+            subject: "E2Z OTP",
+            text: `You seem to have forgotten your password, you are on step closer to retrieving it.\nOne Time Password is ${otp}. This code expires in 5 minutes.\n`,
+        }
+    }
+
     private adminMessage = (emailAddr: string, otp: string) => {
         return {
             from: '"E2Z Bank" <no_reply@e2zbank.com>',
@@ -74,4 +83,20 @@ export class EmailService {
         }
 
     }
+
+    async sendForgotPasswordOtp(emailAddr: string, otp: string) {
+        try {
+            const sender =await this.transporter.sendMail(this.sendForgotPasswordMessage(emailAddr,otp));
+            this.appLogger.log("Mail sent")
+
+            return sender;
+        }
+        catch (e) {
+            this.appLogger.log(e);
+            throw new Error(e.message);
+        }
+
+    }
+
+
 }

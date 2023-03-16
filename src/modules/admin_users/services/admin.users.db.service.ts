@@ -75,7 +75,7 @@ export class AdminUsersDatabaseService {
     newData: object;
   }): Promise<any> {
     const { query, newData } = params;
-    await AdminUser.findOneAndUpdate(
+    return await AdminUser.findOneAndUpdate(
       query,
       newData,
       { upsert: true }

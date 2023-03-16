@@ -80,6 +80,31 @@ export class OtpService {
         return send_message;
     };
 
+    sendForgotPasswordEmailOtp = async (recipientPhoneNumber: string, recipientEmailAddress: string) => {
+
+        const otp = getRndInteger(100000, 999999);
+        // save the otp with the mobile number
+        const checkOtp = (await this.getOTP(recipientPhoneNumber, recipientEmailAddress))
+            .find(Otps => Otps.email == recipientEmailAddress && Otps.mobile_number == recipientPhoneNumber);
+        if (!checkOtp) {
+            // save OTP
+            await this.saveOTP(recipientPhoneNumber, recipientEmailAddress, otp);
+        } else {
+            // update OTP
+            const expires = moment().add(process.env.OTP_EXPIRATION_TIME, 'minutes')
+            await this.updateEmailOTP(recipientEmailAddress, {
+                email: recipientEmailAddress,
+                otp,
+                blacklisted: false,
+                expires
+            });
+        }
+
+        const send_message = this.emailService.sendForgotPasswordOtp(recipientEmailAddress, otp);
+
+        return send_message;
+    };
+
     sendAdminEmailOtp = async (recipientPhoneNumber: string, recipientEmailAddress: string, isLogin: boolean) => {
 
         const otp = getRndInteger(100000, 999999);

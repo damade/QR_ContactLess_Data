@@ -50,7 +50,7 @@ export class AdminUsersService {
                 {
                     query: { phoneNumber: fetchedUser.phoneNumber },
                     newData: { password: user.password },
-                })["_doc"];
+                });
         }
         catch (error) {
             throw new HttpException(getErrorMessage(error), HttpStatus.INTERNAL_SERVER_ERROR)

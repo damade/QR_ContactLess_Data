@@ -25,6 +25,10 @@ export class RequestForDisapprovalDto {
     readonly isProfileImageTheIssue: boolean;
 
     @IsNotEmpty()
+    @IsBoolean()
+    readonly isSignatureImageTheIssue: boolean;
+
+    @IsNotEmpty()
     @IsPhoneNumber('NG',{
         message: "Invalid Phone Number"
     })

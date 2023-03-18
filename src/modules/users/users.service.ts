@@ -86,7 +86,7 @@ export class UsersService {
         };
     }
 
-    async  updatePassword(user: UserPasswordDto): Promise<IUser> {
+    async updatePassword(user: UserPasswordDto): Promise<IUser> {
         try {
             const fetchedUser = await this.findOneByEmail(user.email);
             return await this.userDB.updateUser(
@@ -274,10 +274,22 @@ export class UsersService {
         }
     }
 
-    async disapprovedAccountCreation(userId: string, isProfileImageTheIssue: boolean, comment?: string,): Promise<IUser> {
+    async disapprovedAccountCreation(userId: string, isProfileImageTheIssue: boolean, isSignatureImageTheIssue: boolean,
+        comment?: string,): Promise<IUser> {
         try {
             const userIdObject = new mongoose.Types.ObjectId(userId)
-            if (isProfileImageTheIssue) {
+            
+            if (isProfileImageTheIssue && isSignatureImageTheIssue) {
+                return await this.userDB.updateUser(
+                    {
+                        query: { _id: userIdObject },
+                        newData: {
+                            shouldProfileImageBeReuploaded: true,
+                            shouldSignatureImageBeReuploaded: true,
+                            rejectionComment: comment.getValueOrDefaultString()
+                        },
+                    });
+            } else if (isProfileImageTheIssue) {
                 return await this.userDB.updateUser(
                     {
                         query: { _id: userIdObject },
@@ -287,11 +299,14 @@ export class UsersService {
                         },
                     });
             }
-            else {
+            else if (isSignatureImageTheIssue) {
                 return await this.userDB.updateUser(
                     {
                         query: { _id: userIdObject },
-                        newData: { shouldSignatureImageBeReuploaded: true, rejectionComment: comment.getValueOrDefaultString() },
+                        newData: {
+                            shouldSignatureImageBeReuploaded: true,
+                            rejectionComment: comment.getValueOrDefaultString()
+                        },
                     });
             }
         }

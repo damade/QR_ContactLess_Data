@@ -249,7 +249,8 @@ export class AdminUsersService {
         }
 
         return await this.customerService.disapprovedAccountCreation(
-            user._id, requestDto.isProfileImageTheIssue, requestDto.comment
+            user._id, requestDto.isProfileImageTheIssue, requestDto.isSignatureImageTheIssue,
+             requestDto.comment
         )
 
     }

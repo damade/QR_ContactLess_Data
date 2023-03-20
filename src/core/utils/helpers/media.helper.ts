@@ -39,7 +39,7 @@ export function checkFileSize(file: Express.Multer.File): void {
     // Check size
     const fileSize = file.size
 
-    if (fileSize > 3500000) {
+    if (fileSize > 35000000) {
         {
             throw new InternalServerErrorException("File Should Be Less Than 3.5MB.")
         }

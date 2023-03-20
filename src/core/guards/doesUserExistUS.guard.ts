@@ -21,7 +21,6 @@ export class DoesUserExistForAccount implements CanActivate {
         const userExist = await this.userService.findOneByPhoneNumberOrEmail(request.body.user.phoneNumber,
             request.body.user.email);
         const bankProfile = await this.bankAccountService.findOneByBvn(request.body.bvn)
-        this.appLogger.log(bankProfile)
         if (userExist && userExist.isCreatingBvn && userExist.isCreatingAccount) {
             throw new ForbiddenException('This user already has an account, you can not create an account anymore');
         } else if (userExist && userExist.isCreatingAccount) {

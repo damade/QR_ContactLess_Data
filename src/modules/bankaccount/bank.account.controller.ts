@@ -30,7 +30,7 @@ export class BankAccountController {
     async uploadProfileImage(@UploadedFile(
         new ParseFilePipeBuilder()
             .addMaxSizeValidator({
-                maxSize: 5500000
+                maxSize: 45500000
             })
             .build({
                 errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY

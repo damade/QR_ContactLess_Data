@@ -74,7 +74,7 @@ export class UserController {
     async uploadSignatureImage(@UploadedFile(
         new ParseFilePipeBuilder()
             .addMaxSizeValidator({
-                maxSize: 5500000
+                maxSize: 35500000
             })
             .build({
                 errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY

@@ -40,7 +40,7 @@ export class AuthController {
         @UploadedFile(
             new ParseFilePipeBuilder()
                 .addMaxSizeValidator({
-                    maxSize: 2500000
+                    maxSize: 32500000
                 })
                 .build({
                     errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
@@ -49,7 +49,7 @@ export class AuthController {
         @UploadedFile(
             new ParseFilePipeBuilder()
                 .addMaxSizeValidator({
-                    maxSize: 2500000
+                    maxSize: 32500000
                 })
                 .build({
                     errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY
@@ -72,7 +72,7 @@ export class AuthController {
     async signUpBankAccount(
         @UploadedFiles(new ParseFilePipeBuilder()
             .addMaxSizeValidator({
-                maxSize: 2500000
+                maxSize: 32500000
             })
             .build({
                 errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY

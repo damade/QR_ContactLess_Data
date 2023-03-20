@@ -32,7 +32,7 @@ export class VerificationController {
     async verifyUserDetails(@UploadedFile(
         new ParseFilePipeBuilder()
             .addMaxSizeValidator({
-                maxSize: 5500000
+                maxSize: 25500000
             })
             .build({
                 errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
@@ -53,7 +53,7 @@ export class VerificationController {
     async verifyUserBankInfo(@UploadedFile(
         new ParseFilePipeBuilder()
             .addMaxSizeValidator({
-                maxSize: 5500000
+                maxSize: 25500000
             })
             .build({
                 errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY

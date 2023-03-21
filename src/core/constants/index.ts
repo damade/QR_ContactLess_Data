@@ -53,11 +53,11 @@ export enum EMPLOYMENT_STATUS {
 }
 
 export enum IDENTIFICATION_TYPE {
-    NIN = 'NIN',
-    DRIVERSLICENSE = 'Drivers License',
-    VOTERSCARD = 'Voters Card',
-    INTERNATIONALPASSPORT = 'International Passport',
-    OTHERS = "Others"
+    NIN,
+    DRIVERSLICENSE,
+    VOTERSCARD,
+    INTERNATIONALPASSPORT,
+    OTHERS
 }
 
 export enum REFERRAL_SURVEY{

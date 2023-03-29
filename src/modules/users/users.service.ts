@@ -265,7 +265,7 @@ export class UsersService {
                     query: { _id: userIdObject },
                     newData: {
                         hasAccountBeenApproved: true, hasBvnBeenApproved: true,
-                        shouldSignatureImageBeReuploaded: false, shouldProfileImageBeReuploaded: false
+                        shouldSignatureImageBeReuploaded: false, shouldProfileImageBeReuploaded: false,
                     },
                 });
         }
